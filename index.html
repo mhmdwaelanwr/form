@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#F4EADF" />
+  <title>Claude Builder Club — AOU Egypt | Founding Team Recruitment</title>
+  <meta name="description" content="Founding Team recruitment for Claude Builder Club — AOU Egypt." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="Home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>
+          <strong>Claude Builder Club</strong>
+          <small>AOU Egypt</small>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#teams">Teams</a>
+        <a href="#process">Process</a>
+        <button class="btn btn-dark js-apply">Apply</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <div class="pill">FOUNDING TEAM RECRUITMENT</div>
+        <h1>Build the team.<br><span>Build the culture.</span></h1>
+        <p class="lead">
+          We’re assembling the founding team for Claude Builder Club — AOU Egypt:
+          builders, organizers, designers, marketers, community leaders and operators
+          who want to create serious AI experiences for students.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-dark js-apply">Start application</button>
+          <a class="btn btn-ghost" href="#teams">Explore teams</a>
+        </div>
+        <div class="launch-note" id="launchNote" hidden></div>
+      </div>
+
+      <aside class="hero-panel">
+        <div class="panel-kicker">FOUNDING COHORT</div>
+        <h2>Not a title collection.<br> A team that ships.</h2>
+        <ul>
+          <li>Run technical workshops, build nights, hackathons and demos.</li>
+          <li>Create a credible AI builder community inside AOU Egypt.</li>
+          <li>Work with speakers, clubs, technical communities and industry partners.</li>
+          <li>Turn student ideas into projects, portfolios and measurable outcomes.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="stats wrap">
+      <div><strong>10</strong><span>Core teams</span></div>
+      <div><strong>25+</strong><span>Founding roles</span></div>
+      <div><strong>1</strong><span>Founding cohort</span></div>
+      <div><strong>100%</strong><span>Student-led</span></div>
+    </section>
+
+    <section id="teams" class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="pill">OPEN TEAMS</div>
+            <h2>Find where you can make impact.</h2>
+          </div>
+          <p>Choose the role that fits your real strengths, ownership level and ability to execute.</p>
+        </div>
+        <div class="roles" id="rolesGrid"></div>
+      </div>
+    </section>
+
+    <section id="process" class="section section-soft">
+      <div class="wrap">
+        <div class="section-head">
+          <div>
+            <div class="pill">SELECTION PROCESS</div>
+            <h2>Simple. Serious. Fair.</h2>
+          </div>
+          <p>We value evidence, initiative, communication and consistency more than titles.</p>
+        </div>
+        <div class="steps">
+          <div><b>01</b><h3>Apply</h3><p>Choose your team and submit evidence of your work.</p></div>
+          <div><b>02</b><h3>Review</h3><p>Applications are screened for fit and clarity.</p></div>
+          <div><b>03</b><h3>Interview</h3><p>Short role-focused discussion and scenarios.</p></div>
+          <div><b>04</b><h3>Selection</h3><p>Board and founding team decisions are finalized.</p></div>
+          <div><b>05</b><h3>Onboarding</h3><p>Responsibilities, KPIs and launch sprint begin.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <div class="cta">
+          <div>
+            <h2>Ready to build?</h2>
+            <p>Apply for the founding team and show us what you can own.</p>
+          </div>
+          <button class="btn btn-orange js-apply">Apply now</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <div>
+      <strong>Claude Builder Club — AOU Egypt</strong>
+      <span id="footerMeta">Founding Team Recruitment</span>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+      <div class="modal-head">
+        <div>
+          <small>FOUNDING TEAM APPLICATION</small>
+          <h2 id="formTitle">Claude Builder Club — AOU Egypt</h2>
+        </div>
+        <button class="icon-btn" id="closeModal" aria-label="Close">×</button>
+        <div class="progress"><span id="progress"></span></div>
+      </div>
+
+      <form id="applicationForm" novalidate>
+        <section class="form-page active" data-page="1">
+          <h3>Start with the basics.</h3>
+          <p>Tell us who you are and how we can reach you.</p>
+          <div class="grid2">
+            <label>Full name *<input name="full_name" required /></label>
+            <label>AOU Student ID *<input name="student_id" required /></label>
+            <label>University email *<input type="email" name="email" required /></label>
+            <label>Phone / WhatsApp *<input name="phone" required /></label>
+            <label>Major *<input name="major" placeholder="e.g. Computer Science" required /></label>
+            <label>Academic year *
+              <select name="academic_year" required>
+                <option value="">Select</option>
+                <option>1st Year</option><option>2nd Year</option><option>3rd Year</option>
+                <option>4th Year</option><option>Other</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-page" data-page="2">
+          <h3>Where do you want to contribute?</h3>
+          <p>Choose a first and second preference. Pick based on real interest, not title.</p>
+          <div class="grid2">
+            <label>First preference *<select name="team_first" id="teamFirst" required></select></label>
+            <label>Second preference *<select name="team_second" id="teamSecond" required></select></label>
+          </div>
+          <label>Preferred role *<input name="preferred_role" placeholder="e.g. Graphic Designer, Technical Member, Head of Events" required /></label>
+          <div class="grid2">
+            <label>Weekly availability *
+              <select name="availability" required>
+                <option value="">Select</option><option>2–3 hours</option><option>4–6 hours</option>
+                <option>7–10 hours</option><option>10+ hours</option>
+              </select>
+            </label>
+            <label>Can you attend in-person activities? *
+              <select name="in_person" required>
+                <option value="">Select</option><option>Yes</option><option>Mostly yes</option>
+                <option>Sometimes</option><option>Mostly remote</option>
+              </select>
+            </label>
+          </div>
+          <div id="conditional"></div>
+        </section>
+
+        <section class="form-page" data-page="3">
+          <h3>Show evidence.</h3>
+          <p>Links are optional, but proof of work makes your application much stronger.</p>
+          <div class="grid2">
+            <label>LinkedIn<input type="url" name="linkedin" placeholder="https://linkedin.com/in/..." /></label>
+            <label>GitHub / Portfolio<input type="url" name="portfolio" placeholder="https://..." /></label>
+            <label>Design / Media Portfolio<input type="url" name="design_portfolio" placeholder="Behance, Drive, Instagram..." /></label>
+            <label>Other relevant link<input type="url" name="other_link" placeholder="Project, event, article, repo..." /></label>
+          </div>
+          <label>Tell us about something you actually shipped or organized *
+            <textarea name="evidence" required placeholder="What was your role? What did you do? What happened?"></textarea>
+          </label>
+        </section>
+
+        <section class="form-page" data-page="4">
+          <h3>Think like an owner.</h3>
+          <p>There are no perfect answers. We want to see how you think.</p>
+          <label>Why do you want to join the founding team? *
+            <textarea name="motivation" required></textarea>
+          </label>
+          <label>Scenario *
+            <textarea name="scenario" required placeholder="An event is 48 hours away. Registrations are low, a team member disappears, and the speaker asks for a schedule change. What do you do first, and why?"></textarea>
+          </label>
+          <label>What would you improve at AOU through this club? *
+            <textarea name="campus_impact" required></textarea>
+          </label>
+        </section>
+
+        <section class="form-page" data-page="5">
+          <h3>Final check.</h3>
+          <p>Founding team roles require consistency, communication and accountability.</p>
+          <label class="check"><input type="checkbox" name="commitment" required /><span>I understand this is a real operating role, not just a title or certificate.</span></label>
+          <label class="check"><input type="checkbox" name="accuracy" required /><span>I confirm the information in this application is accurate.</span></label>
+          <label class="check"><input type="checkbox" name="privacy" required /><span>I agree that my application data may be reviewed by the recruitment team for selection purposes.</span></label>
+          <label>Anything else we should know?<textarea name="notes"></textarea></label>
+        </section>
+
+        <div class="form-nav">
+          <button type="button" class="btn btn-ghost" id="backBtn">← Back</button>
+          <button type="button" class="btn btn-dark" id="nextBtn">Continue →</button>
+        </div>
+      </form>
+
+      <div class="success" id="success">
+        <div class="success-icon">✓</div>
+        <h3>Application received.</h3>
+        <p id="successMessage">Thank you. Keep your application ID for reference.</p>
+        <div class="application-id" id="applicationId"></div>
+        <button class="btn btn-dark" id="downloadCopy">Download application copy</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
