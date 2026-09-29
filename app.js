@@ -181,39 +181,99 @@ async function submitApplication(){
     alert("Applications are not open.");
     return;
   }
-  nextBtn.disabled=true;
-  nextBtn.textContent="Submitting...";
+
+  nextBtn.disabled = true;
+  nextBtn.textContent = "Submitting...";
 
   const payload = formObject();
-  try{
-    const res = await fetch(CFG.SUBMISSION_ENDPOINT,{
-      method:"POST",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify(payload)
-    });
+  const nonce = "cbc-" + Date.now() + "-" + Math.random().toString(36).slice(2, 12);
+  payload._transport = "iframe";
+  payload._nonce = nonce;
 
-    let result = null;
-    try { result = await res.json(); } catch(e) {}
+  let frame = null;
+  let submitForm = null;
+  let timer = null;
 
-    if(result && result.ok===false){
-      throw new Error(result.message || "Submission failed.");
+  const cleanup = () => {
+    window.removeEventListener("message", onMessage);
+    if(timer) clearTimeout(timer);
+    if(submitForm) submitForm.remove();
+    if(frame) frame.remove();
+  };
+
+  const finishButtons = () => {
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Submit application →";
+  };
+
+  const onMessage = (event) => {
+    const allowedOrigin =
+      event.origin.includes("googleusercontent.com") ||
+      event.origin.includes("script.google.com");
+
+    if(!allowedOrigin) return;
+    if(!event.data || event.data.type !== "CBC_APPLICATION_RESULT") return;
+    if(event.data.nonce !== nonce) return;
+
+    const result = event.data;
+    cleanup();
+    finishButtons();
+
+    if(result.ok === false){
+      alert(result.message || "Submission failed. Please try again.");
+      return;
     }
 
-    latestSubmission = {...payload, ...(result||{})};
-    form.style.display="none";
+    latestSubmission = {...payload, ...result};
+    delete latestSubmission._transport;
+    delete latestSubmission._nonce;
+
+    form.style.display = "none";
     success.classList.add("show");
-    const appId = (result && result.application_id) || "Submitted";
+
+    const appId = result.application_id || "Submitted";
     document.querySelector("#applicationId").textContent = appId;
     document.querySelector("#successMessage").textContent =
-      result && result.duplicate
-      ? "We already have an application with this student ID or email. Your existing application was not duplicated."
-      : "Thank you. Keep your application ID for reference.";
+      result.duplicate
+        ? "We already have an application with this Student ID or email. Your existing application was not duplicated."
+        : "Thank you. Keep your application ID for reference.";
+  };
+
+  try{
+    window.addEventListener("message", onMessage);
+
+    frame = document.createElement("iframe");
+    frame.name = "cbc-submit-" + nonce.replace(/[^a-z0-9-]/gi, "");
+    frame.style.display = "none";
+    frame.setAttribute("aria-hidden", "true");
+    document.body.appendChild(frame);
+
+    submitForm = document.createElement("form");
+    submitForm.method = "POST";
+    submitForm.action = CFG.SUBMISSION_ENDPOINT;
+    submitForm.target = frame.name;
+    submitForm.style.display = "none";
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "application_payload";
+    input.value = JSON.stringify(payload);
+    submitForm.appendChild(input);
+
+    document.body.appendChild(submitForm);
+
+    timer = setTimeout(() => {
+      cleanup();
+      finishButtons();
+      alert("The submission is taking too long. Please check your internet connection and try again.");
+    }, 30000);
+
+    submitForm.submit();
   }catch(err){
-    alert("We could not submit your application. Please check your internet connection and try again.");
+    cleanup();
+    finishButtons();
     console.error(err);
-  }finally{
-    nextBtn.disabled=false;
-    nextBtn.textContent="Submit application →";
+    alert("We could not submit your application. Please try again.");
   }
 }
 
