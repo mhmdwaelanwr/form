@@ -131,27 +131,29 @@ function doGet() {
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
+  let data = {};
+
   try {
     lock.waitLock(10000);
+    data = parseBody_(e);
 
     if (!recruitmentIsOpen_()) {
-      return json_({ok:false,message:"Applications are closed."});
+      return reply_({ok:false,message:"Applications are closed."}, data);
     }
 
-    const data = parseBody_(e);
     const required = ["full_name","student_id","email","phone","major","academic_year","team_first","team_second","preferred_role","availability","in_person","evidence","motivation","scenario","campus_impact"];
     for (const key of required) {
       if (!String(data[key] || "").trim()) {
-        return json_({ok:false,message:"Missing required field: " + key});
+        return reply_({ok:false,message:"Missing required field: " + key}, data);
       }
     }
 
     if (!isValidEmail_(data.email)) {
-      return json_({ok:false,message:"Invalid email address."});
+      return reply_({ok:false,message:"Invalid email address."}, data);
     }
 
     if (!isTrue_(data.commitment) || !isTrue_(data.accuracy) || !isTrue_(data.privacy)) {
-      return json_({ok:false,message:"Required acknowledgements were not accepted."});
+      return reply_({ok:false,message:"Required acknowledgements were not accepted."}, data);
     }
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -160,12 +162,12 @@ function doPost(e) {
 
     const existing = findDuplicate_(sheet, String(data.student_id).trim(), String(data.email).trim().toLowerCase());
     if (existing) {
-      return json_({
+      return reply_({
         ok:true,
         duplicate:true,
         application_id: existing.application_id,
         message:"An application already exists for this student ID or email."
-      });
+      }, data);
     }
 
     const applicationId = makeApplicationId_();
@@ -184,15 +186,16 @@ function doPost(e) {
     if (SETTINGS.SEND_APPLICANT_EMAIL) {
       try { sendApplicantReceipt_(record); } catch (mailErr) { console.error(mailErr); }
     }
+
     const internalEmail = getConfigValue_("Internal Notification Email");
     if (internalEmail && isValidEmail_(internalEmail)) {
       try { sendInternalNotification_(record, internalEmail); } catch (mailErr) { console.error(mailErr); }
     }
 
-    return json_({ok:true,duplicate:false,application_id:applicationId});
+    return reply_({ok:true,duplicate:false,application_id:applicationId}, data);
   } catch (err) {
     console.error(err);
-    return json_({ok:false,message:"Server error. Please try again later."});
+    return reply_({ok:false,message:"Server error. Please try again later."}, data);
   } finally {
     try { lock.releaseLock(); } catch (_) {}
   }
@@ -200,11 +203,39 @@ function doPost(e) {
 
 function parseBody_(e) {
   if (!e) return {};
+
+  if (e.parameter && e.parameter.application_payload) {
+    try { return JSON.parse(e.parameter.application_payload); } catch (_) {}
+  }
+
   const raw = e.postData && e.postData.contents ? e.postData.contents : "";
   if (raw) {
     try { return JSON.parse(raw); } catch (_) {}
   }
+
   return e.parameter || {};
+}
+
+function reply_(obj, data) {
+  if (data && data._transport === "iframe" && data._nonce) {
+    const message = Object.assign({
+      type: "CBC_APPLICATION_RESULT",
+      nonce: String(data._nonce)
+    }, obj);
+
+    const json = JSON.stringify(message).replace(/</g, "\\u003c");
+    const targetOrigin = "https://mhmdwaelanwr.github.io";
+
+    return HtmlService
+      .createHtmlOutput(
+        "<!doctype html><html><body><script>" +
+        "window.parent.postMessage(" + json + "," + JSON.stringify(targetOrigin) + ");" +
+        "</script></body></html>"
+      )
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+
+  return json_(obj);
 }
 
 function getConfigValue_(key) {
