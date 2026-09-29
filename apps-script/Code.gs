@@ -10,7 +10,7 @@ SETUP:
 5. Deploy → New deployment → Web app.
 6. Execute as: Me.
 7. Choose an access setting appropriate for your recruitment flow.
-8. Copy the Web App /exec URL into config.js.
+8. Copy the Web App /exec URL into the Vercel environment variable GOOGLE_APPS_SCRIPT_URL.
 
 Do not put private secrets in the front-end.
 */
@@ -19,8 +19,6 @@ const SETTINGS = {
   APPLICATIONS_SHEET: "Applications",
   CONFIG_SHEET: "Config",
   SEND_APPLICANT_EMAIL: true,
-  SEND_INTERNAL_NOTIFICATION: false,
-  INTERNAL_NOTIFICATION_EMAIL: "", // optional
   CLUB_NAME: "Claude Builder Club — AOU Egypt"
 };
 
@@ -51,6 +49,9 @@ const HEADERS = [
   "scenario",
   "campus_impact",
   "notes",
+  "commitment",
+  "accuracy",
+  "privacy",
   "leadership_exp",
   "vp_priority",
   "coord_exp",
@@ -80,7 +81,10 @@ function setup() {
   let apps = ss.getSheetByName(SETTINGS.APPLICATIONS_SHEET);
   if (!apps) apps = ss.insertSheet(SETTINGS.APPLICATIONS_SHEET);
 
-  apps.clear();
+  // Safe/idempotent setup: do not destroy existing applications.
+  if (apps.getLastRow() > 1) {
+    throw new Error("Applications already exist. setup() will not overwrite applicant data.");
+  }
   apps.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   apps.setFrozenRows(1);
   apps.getRange(1,1,1,HEADERS.length)
@@ -110,7 +114,7 @@ function setup() {
     ["Setting","Value"],
     ["Club Name", SETTINGS.CLUB_NAME],
     ["Recruitment Status","OPEN"],
-    ["Internal Notification Email", SETTINGS.INTERNAL_NOTIFICATION_EMAIL],
+    ["Internal Notification Email", ""],
     ["Notes","Set Recruitment Status to CLOSED to stop submissions."]
   ]);
   cfg.getRange("A1:B1").setFontWeight("bold").setBackground("#DA6D3D").setFontColor("#FFFFFF");
@@ -146,6 +150,10 @@ function doPost(e) {
       return json_({ok:false,message:"Invalid email address."});
     }
 
+    if (!isTrue_(data.commitment) || !isTrue_(data.accuracy) || !isTrue_(data.privacy)) {
+      return json_({ok:false,message:"Required acknowledgements were not accepted."});
+    }
+
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName(SETTINGS.APPLICATIONS_SHEET);
     if (!sheet) throw new Error("Applications sheet not found. Run setup() first.");
@@ -176,8 +184,9 @@ function doPost(e) {
     if (SETTINGS.SEND_APPLICANT_EMAIL) {
       try { sendApplicantReceipt_(record); } catch (mailErr) { console.error(mailErr); }
     }
-    if (SETTINGS.SEND_INTERNAL_NOTIFICATION && SETTINGS.INTERNAL_NOTIFICATION_EMAIL) {
-      try { sendInternalNotification_(record); } catch (mailErr) { console.error(mailErr); }
+    const internalEmail = getConfigValue_("Internal Notification Email");
+    if (internalEmail && isValidEmail_(internalEmail)) {
+      try { sendInternalNotification_(record, internalEmail); } catch (mailErr) { console.error(mailErr); }
     }
 
     return json_({ok:true,duplicate:false,application_id:applicationId});
@@ -198,13 +207,22 @@ function parseBody_(e) {
   return e.parameter || {};
 }
 
-function recruitmentIsOpen_() {
+function getConfigValue_(key) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const cfg = ss.getSheetByName(SETTINGS.CONFIG_SHEET);
-  if (!cfg) return true;
+  if (!cfg || cfg.getLastRow() < 1) return "";
   const values = cfg.getRange(1,1,cfg.getLastRow(),2).getValues();
-  const row = values.find(r => String(r[0]).trim() === "Recruitment Status");
-  return !row || String(row[1]).trim().toUpperCase() === "OPEN";
+  const row = values.find(r => String(r[0]).trim() === key);
+  return row ? String(row[1] || "").trim() : "";
+}
+
+function recruitmentIsOpen_() {
+  const value = getConfigValue_("Recruitment Status");
+  return !value || value.toUpperCase() === "OPEN";
+}
+
+function isTrue_(value) {
+  return value === true || String(value).toLowerCase() === "true" || String(value).toLowerCase() === "on";
 }
 
 function findDuplicate_(sheet, studentId, email) {
@@ -258,9 +276,9 @@ function sendApplicantReceipt_(record) {
   });
 }
 
-function sendInternalNotification_(record) {
+function sendInternalNotification_(record, recipient) {
   MailApp.sendEmail({
-    to: SETTINGS.INTERNAL_NOTIFICATION_EMAIL,
+    to: recipient,
     subject: "New application — " + record.full_name,
     htmlBody:
       "<p><b>" + escapeHtml_(record.full_name) + "</b> submitted a new application.</p>" +
