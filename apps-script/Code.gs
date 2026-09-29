@@ -113,7 +113,7 @@ function setup() {
   cfg.getRange("A1:B5").setValues([
     ["Setting","Value"],
     ["Club Name", SETTINGS.CLUB_NAME],
-    ["Recruitment Status","OPEN"],
+    ["Recruitment Status","CLOSED"],
     ["Internal Notification Email", ""],
     ["Notes","Set Recruitment Status to CLOSED to stop submissions."]
   ]);
