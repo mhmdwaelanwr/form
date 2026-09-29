@@ -1,66 +1,69 @@
 # Claude Builder Club — AOU Egypt
 ## Founding Team Recruitment Website
 
-Production-ready recruitment system prepared for the official launch.
+Official-launch-ready recruitment system for the club founding team.
 
-The public application is **disabled by default**. The site can be deployed in staging now, but nobody can submit until `IS_LIVE` is switched on.
+**Public site target:** `https://mhmdwaelanwr.github.io/form/`
+
+The site is intentionally **closed by default**. It can be published now as a staging/coming-soon page, while real applications stay blocked until launch.
 
 ## Architecture
 
 ```
 Applicant
    ↓
-Vercel website
-   ↓ same-origin POST
-/api/submit
-   ↓ server-side proxy
+GitHub Pages
+   ↓ cross-origin form transport
 Google Apps Script Web App
    ↓
 Google Sheet: CBC AOU Egypt — Recruitment 2026
 ```
 
-The Apps Script URL is stored server-side in Vercel as `GOOGLE_APPS_SCRIPT_URL`; it is not exposed in browser code.
+The Google Apps Script `/exec` URL is a public web endpoint used by the form. It is not a password or secret.
 
 ## Included
 
-- Responsive recruitment site
-- 5-step application flow
+- Responsive recruitment website
+- 5-step multi-role application form
 - Team-specific dynamic questions
-- Required-field validation + consent capture
+- Required-field validation
+- Consent capture
 - Honeypot spam field
-- Duplicate prevention by Student ID/email
-- Unique application IDs
-- Google Sheets application database
+- Duplicate protection by Student ID / email
+- Unique Application IDs
+- Google Sheets applicant database
 - Review workflow: New → Shortlisted → Interview → Accepted / Waitlist / Rejected
 - Reviewer, score and notes columns
 - Applicant confirmation email
-- Optional internal notification email controlled from the Config sheet
+- Club inbox notification support
 - Server-side OPEN/CLOSED switch
 - Formula-injection protection
-- Vercel security headers
-- Staging/launch switch
+- GitHub Pages deployment workflow
+- Staging / official-launch switch
 
-## Files
+## Official club contact
+
+`claudebuilder.aou@gmail.com`
+
+## Repository files
 
 - `index.html` — website
 - `styles.css` — UI
-- `app.js` — form and application logic
-- `config.js` — public launch switch
-- `api/submit.js` — Vercel serverless proxy
-- `vercel.json` — deployment/security configuration
+- `app.js` — application flow
+- `config.js` — public launch configuration
 - `apps-script/Code.gs` — Google Apps Script backend
 - `apps-script/appsscript.json` — Apps Script manifest
-- `LAUNCH_GUIDE.md` — final setup steps
+- `.github/workflows/pages.yml` — GitHub Pages deployment
+- `LAUNCH_GUIDE.md` — final setup instructions
 
-## Launch checklist
+## Before official launch
 
-Before setting `IS_LIVE: true`:
+1. Enable GitHub Pages with **Source = GitHub Actions**.
+2. Deploy `apps-script/Code.gs` as a Google Apps Script Web App.
+3. Put the returned `/exec` URL in `config.js`.
+4. Submit one end-to-end test application.
+5. Verify the Sheet row and applicant receipt email.
+6. Keep `IS_LIVE: false` until the official launch.
+7. On launch day, switch it to `true`.
 
-1. receive the authorization needed to launch the club,
-2. deploy `apps-script/Code.gs` as a Google Apps Script Web App,
-3. add its `/exec` URL to Vercel as `GOOGLE_APPS_SCRIPT_URL`,
-4. submit one end-to-end test application,
-5. verify the Sheet row + confirmation email,
-6. then switch `IS_LIVE` to `true`.
-
-Never commit passwords, OAuth tokens, or private credentials to this repository.
+Never commit passwords, OAuth tokens, recovery codes, or private credentials.
