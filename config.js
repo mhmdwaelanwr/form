@@ -14,7 +14,7 @@ window.CLUB_CONFIG = {
   IS_LIVE: false,
 
   // Paste the Google Apps Script Web App URL ending in /exec here.
-  SUBMISSION_ENDPOINT: "",
+  SUBMISSION_ENDPOINT: "https://script.google.com/macros/s/AKfycbzH7s_5RU_h40YDqd57pbPo1jMJ-FOMXtFRvHTFHhLJXQrbvoqf3N3gq1L-VmwTK2i83Q/exec",
 
   // Optional ISO timestamp. Leave blank if you do not want an automatic close.
   APPLICATIONS_CLOSE_AT: "",
