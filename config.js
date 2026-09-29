@@ -1,24 +1,24 @@
 /*
-  LAUNCH CONFIGURATION
+  GITHUB PAGES LAUNCH CONFIGURATION
 
-  Keep IS_LIVE = false while preparing the site.
+  Keep IS_LIVE = false while preparing the club.
+  After the Google Apps Script Web App is deployed:
+  1) paste its /exec URL into SUBMISSION_ENDPOINT,
+  2) test one application,
+  3) keep IS_LIVE false until the official launch,
+  4) switch IS_LIVE to true on launch day.
 
-  Production flow:
-  - Website is deployed on Vercel.
-  - The browser submits to /api/submit (same origin).
-  - Vercel securely forwards to Google Apps Script using the
-    GOOGLE_APPS_SCRIPT_URL environment variable.
-  - The Apps Script URL is never exposed in client-side code.
+  The Apps Script /exec URL is a public web endpoint, not a password or private key.
 */
 window.CLUB_CONFIG = {
   IS_LIVE: false,
 
-  // Same-origin Vercel serverless endpoint.
-  SUBMISSION_ENDPOINT: "/api/submit",
+  // Paste the Google Apps Script Web App URL ending in /exec here.
+  SUBMISSION_ENDPOINT: "",
 
   // Optional ISO timestamp. Leave blank if you do not want an automatic close.
   APPLICATIONS_CLOSE_AT: "",
 
-  // Optional public contact address shown in the footer.
-  CONTACT_EMAIL: ""
+  // Official club contact email.
+  CONTACT_EMAIL: "claudebuilder.aou@gmail.com"
 };
