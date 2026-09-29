@@ -67,3 +67,6 @@ The Google Apps Script `/exec` URL is a public web endpoint used by the form. It
 7. On launch day, switch it to `true`.
 
 Never commit passwords, OAuth tokens, recovery codes, or private credentials.
+
+
+> GitHub Pages is enabled with GitHub Actions deployment.
