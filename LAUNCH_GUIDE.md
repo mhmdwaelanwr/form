@@ -1,90 +1,123 @@
-# Launch Guide — 10 minutes
+# Launch Guide
 
-## 1. Create the applications database
-1. Go to Google Sheets and create a new spreadsheet.
-2. Suggested name: `CBC AOU Egypt — Recruitment 2026`.
-3. Open **Extensions → Apps Script**.
-4. Replace the default code with `apps-script/Code.gs`.
-5. In Apps Script, open **Project Settings** and confirm the time zone is Cairo, or add the included `appsscript.json`.
-6. Select the `setup` function and click **Run**.
-7. Approve the requested permissions.
-8. Return to the Sheet. You will now have:
-   - `Applications`
-   - `Config`
+Most of the system is already prepared.
 
-## 2. Deploy the backend
-1. In Apps Script click **Deploy → New deployment**.
-2. Type: **Web app**.
-3. Execute as: **Me**.
-4. Choose the access setting that lets your intended applicants submit.
+The Google Sheet **CBC AOU Egypt — Recruitment 2026** already exists with:
+- Applications sheet
+- Config sheet
+- review status workflow
+- reviewer / score / notes fields
+
+The only Google-side step that must be done manually is deploying the Apps Script Web App, because that action requires your Google authorization.
+
+## Step 1 — Attach the Apps Script backend
+
+1. Open the recruitment Google Sheet.
+2. Choose **Extensions → Apps Script**.
+3. Replace the default `Code.gs` with the repository file:
+   `apps-script/Code.gs`
+4. If you use the manifest editor, use:
+   `apps-script/appsscript.json`
+5. Run `setup()` once and approve Google's authorization prompts.
+
+> `setup()` refuses to overwrite the sheet after real applications exist.
+
+## Step 2 — Deploy it
+
+1. **Deploy → New deployment**
+2. Type: **Web app**
+3. Execute as: **Me**
+4. Select an access level that allows the intended AOU applicants to submit.
 5. Deploy.
 6. Copy the URL ending in `/exec`.
 
-## 3. Connect the website
-Open `config.js` and paste the `/exec` URL:
+Do not send any password or Google credential. The `/exec` URL is enough.
 
-```js
-window.CLUB_CONFIG = {
-  IS_LIVE: false,
-  SUBMISSION_ENDPOINT: "PASTE_YOUR_EXEC_URL_HERE",
-  APPLICATIONS_CLOSE_AT: "",
-  CONTACT_EMAIL: ""
-};
-```
+## Step 3 — Connect Vercel
 
-Keep `IS_LIVE: false` while testing.
+The website submits to `/api/submit`, so the Google Apps Script URL stays server-side.
 
-## 4. Test before launch
-Temporarily set:
-```js
-IS_LIVE: true
-```
-Open the website and submit one test application.
+In the Vercel project add this environment variable:
 
-Check:
-- A new row appears in `Applications`
-- Application ID was generated
-- Applicant email receipt arrived
-- Duplicate submission returns the same application ID
+- Name: `GOOGLE_APPS_SCRIPT_URL`
+- Value: the Apps Script `/exec` URL
 
-Then delete the test row if you want.
+Apply it to the environments you intend to use and redeploy.
 
-## 5. Official launch
-When you are ready:
+## Step 4 — End-to-end test
+
+Keep `IS_LIVE: false` while configuring.
+
+For the test, change `config.js` to:
+
 ```js
 IS_LIVE: true
 ```
 
-Deploy the website folder to Vercel, Netlify, GitHub Pages or Cloudflare Pages.
+Submit one test application and confirm:
 
-## 6. Close recruitment
-You have two options.
+- a row appears in `Applications`,
+- an ID such as `CBC-AOU-YYYYMMDD-XXXXXX` is returned,
+- the applicant confirmation email arrives,
+- a duplicate Student ID/email does not create another row.
 
-### Website-side close
-Set an automatic date in `config.js`:
+After testing, switch back to `false` until official launch.
+
+## Step 5 — Official launch
+
+When the club is ready to go public:
+
+```js
+IS_LIVE: true
+```
+
+Optionally set:
+
 ```js
 APPLICATIONS_CLOSE_AT: "2026-10-15T23:59:59+03:00"
+CONTACT_EMAIL: "your-public-club-email@example.com"
 ```
 
-### Server-side emergency close
-In the Google Sheet, open `Config` and change:
-`Recruitment Status` from `OPEN` to `CLOSED`.
+## Emergency close
 
-The server will reject new applications even if an old website copy is still online.
+The Google Sheet has a `Config` tab.
 
-## Suggested reviewing workflow
-Use the `Applications` sheet columns:
+Change:
+
+`Recruitment Status | OPEN`
+
+to:
+
+`Recruitment Status | CLOSED`
+
+The backend will reject new applications even if an old public website build is still available.
+
+## Internal notifications
+
+In the `Config` sheet, put a valid address beside:
+
+`Internal Notification Email`
+
+Every successful new application will then send a notification to that address.
+
+## Review workflow
+
+Use these columns in `Applications`:
+
 - `status`
 - `reviewer`
 - `review_score`
 - `review_notes`
 
-Recommended score:
-- Evidence / previous work — 30
-- Ownership / scenario thinking — 25
-- Role-specific fit — 20
-- Communication — 15
-- Availability / reliability — 10
-Total — 100
+Suggested scoring model:
 
-Suggested shortlist threshold: decide after seeing the applicant pool; don't hard-code it before applications arrive.
+| Area | Points |
+|---|---:|
+| Evidence / previous work | 30 |
+| Ownership / scenario thinking | 25 |
+| Role-specific fit | 20 |
+| Communication | 15 |
+| Availability / reliability | 10 |
+| **Total** | **100** |
+
+Choose the shortlist threshold after seeing the applicant pool rather than hard-coding it before recruitment.
