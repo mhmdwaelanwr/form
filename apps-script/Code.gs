@@ -337,20 +337,23 @@ function findDuplicate_(sheet, studentId, email) {
   const last = sheet.getLastRow();
   if (last < 2) return null;
 
-  const idCol = HEADERS.indexOf("student_id") + 1;
-  const emailCol = HEADERS.indexOf("email") + 1;
-  const appIdCol = HEADERS.indexOf("application_id") + 1;
+  const headers = getHeaders_(sheet);
+  const idCol = headers.indexOf("student_id");
+  const emailCol = headers.indexOf("email");
+  if (idCol < 0 || emailCol < 0) return null;
 
-  const ids = sheet.getRange(2,idCol,last-1,1).getValues().flat().map(v=>String(v).trim());
-  const emails = sheet.getRange(2,emailCol,last-1,1).getValues().flat().map(v=>String(v).trim().toLowerCase());
+  const rows = sheet.getRange(2,1,last-1,headers.length).getValues();
 
-  for (let i=0;i<ids.length;i++) {
-    if (ids[i] === studentId || emails[i] === email) {
-      return {application_id: sheet.getRange(i+2,appIdCol).getValue()};
+  for (let i=0;i<rows.length;i++) {
+    const rowId = String(rows[i][idCol] || "").trim();
+    const rowEmail = String(rows[i][emailCol] || "").trim().toLowerCase();
+    if (rowId === studentId || rowEmail === email) {
+      return {row:i+2};
     }
   }
   return null;
 }
+
 
 function makeApplicationId_() {
   const date = Utilities.formatDate(new Date(), Session.getScriptTimeZone() || "Africa/Cairo", "yyyyMMdd");
@@ -368,6 +371,10 @@ function sanitize_(value) {
 
 function isValidEmail_(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
+}
+
+function isValidAouEmail_(email) {
+  return /^[^\s@]+@std\.aou\.edu\.eg$/i.test(String(email || "").trim());
 }
 
 function sendApplicantReceipt_(record) {
