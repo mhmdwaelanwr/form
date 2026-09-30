@@ -136,7 +136,8 @@
           <div class="grid2">
             <label>Full name *<input name="full_name" required /></label>
             <label>AOU Student ID *<input name="student_id" required /></label>
-            <label>University email *<input type="email" name="email" required /></label>
+            <label>Personal email *<input type="email" name="email" autocomplete="email" placeholder="you@example.com" required /></label>
+            <label>AOU university email *<input type="email" name="university_email" autocomplete="email" placeholder="student@std.aou.edu.eg" required /></label>
             <label>Phone / WhatsApp *<input name="phone" required /></label>
             <label>Faculty *
               <select name="faculty" id="facultySelect" required>
@@ -257,8 +258,8 @@
 
         <div class="success-summary">
           <div>
-            <span>Application ID</span>
-            <strong id="applicationId">—</strong>
+            <span>Submission reference</span>
+            <strong id="submissionReference">—</strong>
           </div>
           <div>
             <span>First preference</span>
@@ -271,7 +272,15 @@
           <p>Our recruitment team will review your application. If your profile is shortlisted, we’ll contact you using the email or phone number you submitted with the next step and interview details.</p>
         </div>
 
-        <p class="success-note">A confirmation email should arrive shortly. Please keep your Application ID for reference.</p>
+        <p class="success-note">A confirmation email should arrive shortly with your official Application ID.</p>
+
+        <div class="whatsapp-follow">
+          <div>
+            <strong>Follow the latest recruitment updates</strong>
+            <span>Join the official WhatsApp group to follow the latest changes and announcements.</span>
+          </div>
+          <a class="btn btn-whatsapp" href="https://chat.whatsapp.com/GwiXzxyBXTBDsBqeenPYP8" target="_blank" rel="noopener noreferrer">Join WhatsApp updates ↗</a>
+        </div>
 
         <div class="success-actions">
           <button class="btn btn-dark" id="downloadCopy">Download application copy</button>
