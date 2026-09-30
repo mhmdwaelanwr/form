@@ -22,7 +22,8 @@
       <nav class="nav-links" aria-label="Primary">
         <a href="#teams">Teams</a>
         <a href="#process">Process</a>
-        <button class="btn btn-dark js-apply">Apply</button>
+        <span class="nav-status" id="navStatus" hidden>Applications opening soon</span>
+        <button class="btn btn-dark js-apply nav-apply" data-open-label="Apply">Apply</button>
       </nav>
     </div>
   </header>
@@ -30,23 +31,24 @@
   <main id="top">
     <section class="hero wrap">
       <div class="hero-copy">
+        <div class="hero-status" id="heroStatus">Applications opening soon</div>
         <div class="eyebrow">FOUNDING TEAM RECRUITMENT</div>
-        <h1>Join the founding team of<br><span>Claude Builder Club — AOU Egypt.</span></h1>
+        <h1>Join the founding team.</h1>
+        <p class="hero-club-name">Claude Builder Club — AOU Egypt</p>
         <p class="lead">
           We’re recruiting students who can build, organize, design, market and lead.
-          Join the team creating technical workshops, community programs, projects and
-          high-quality AI experiences at AOU Egypt.
+          Help create technical workshops, community programs, projects and high-quality
+          AI experiences for students at AOU Egypt.
         </p>
         <div class="hero-actions">
-          <button class="btn btn-dark js-apply">Start application</button>
+          <button class="btn btn-dark js-apply" data-open-label="Start application">Start application</button>
           <a class="btn btn-ghost" href="#teams">Explore teams</a>
         </div>
-        <div class="launch-note" id="launchNote" hidden></div>
       </div>
 
       <aside class="hero-panel">
-        <div class="panel-kicker">WHAT WE ARE BUILDING</div>
-        <h2>A serious student team with real ownership.</h2>
+        <div class="panel-kicker">WHAT YOU’LL HELP BUILD</div>
+        <h2>A focused student team with real ownership.</h2>
         <ul>
           <li>Run technical workshops, build nights, hackathons and demos.</li>
           <li>Create a credible AI builder community inside AOU Egypt.</li>
@@ -102,7 +104,7 @@
             <h2>Ready to build?</h2>
             <p>Apply for the founding team and show us what you can own.</p>
           </div>
-          <button class="btn btn-orange js-apply">Apply now</button>
+          <button class="btn btn-orange js-apply" data-open-label="Apply now">Apply now</button>
         </div>
       </div>
     </section>
