@@ -247,6 +247,74 @@ function reply_(obj, data) {
   return json_(obj);
 }
 
+function ensureSchema_(sheet) {
+  const currentLastColumn = Math.max(sheet.getLastColumn(), 1);
+  const current = sheet.getRange(1,1,1,currentLastColumn).getValues()[0]
+    .map(v => String(v || "").trim());
+
+  if (!current.some(Boolean)) {
+    sheet.getRange(1,1,1,HEADERS.length).setValues([HEADERS]);
+    return;
+  }
+
+  const missing = HEADERS.filter(h => !current.includes(h));
+  if (!missing.length) return;
+
+  const startCol = currentLastColumn + 1;
+  const neededLastCol = startCol + missing.length - 1;
+  if (sheet.getMaxColumns() < neededLastCol) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), neededLastCol - sheet.getMaxColumns());
+  }
+  sheet.getRange(1,startCol,1,missing.length).setValues([missing]);
+}
+
+function getHeaders_(sheet) {
+  const lastCol = sheet.getLastColumn();
+  if (lastCol < 1) return [];
+  return sheet.getRange(1,1,1,lastCol).getValues()[0]
+    .map(v => String(v || "").trim());
+}
+
+function appendRecord_(sheet, record) {
+  const headers = getHeaders_(sheet);
+  sheet.appendRow(headers.map(h => sanitize_(record[h])));
+}
+
+function getRowRecord_(sheet, rowNumber) {
+  const headers = getHeaders_(sheet);
+  const values = sheet.getRange(rowNumber,1,1,headers.length).getValues()[0];
+  const out = {};
+  headers.forEach((h,i)=>{ if(h) out[h] = values[i]; });
+  return out;
+}
+
+function writeRecordToRow_(sheet, rowNumber, record) {
+  const headers = getHeaders_(sheet);
+  const current = sheet.getRange(rowNumber,1,1,headers.length).getValues()[0];
+  const protectedFields = new Set(["status","reviewer","review_score","review_notes"]);
+
+  const values = headers.map((h,i)=>{
+    if (protectedFields.has(h) && current[i] !== "" && current[i] !== null) return current[i];
+    if (Object.prototype.hasOwnProperty.call(record,h)) return sanitize_(record[h]);
+    return current[i];
+  });
+
+  sheet.getRange(rowNumber,1,1,headers.length).setValues([values]);
+}
+
+function ensureConfigRow_(cfg, key, defaultValue) {
+  const last = Math.max(cfg.getLastRow(),1);
+  const values = cfg.getRange(1,1,last,2).getValues();
+  const found = values.some(r => String(r[0]).trim() === key);
+  if (!found) cfg.appendRow([key, defaultValue]);
+}
+
+function getInternalNotificationEmail_() {
+  const configured = getConfigValue_("Internal Notification Email");
+  if (configured && isValidEmail_(configured)) return configured;
+  return SETTINGS.CLUB_EMAIL;
+}
+
 function getConfigValue_(key) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const cfg = ss.getSheetByName(SETTINGS.CONFIG_SHEET);
