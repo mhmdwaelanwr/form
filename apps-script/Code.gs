@@ -127,7 +127,7 @@ function doPost(e) {
       return reply_({ok:false,message:"Applications are closed."}, data);
     }
 
-    const required = ["full_name","student_id","email","phone","major","academic_year","team_first","team_second","preferred_role","availability","in_person","evidence","motivation","scenario","campus_impact"];
+    const required = ["full_name","student_id","email","university_email","phone","major","academic_year","team_first","team_second","preferred_role","availability","in_person","evidence","motivation","scenario","campus_impact"];
     for (const key of required) {
       if (!String(data[key] || "").trim()) {
         return reply_({ok:false,message:"Missing required field: " + key}, data);
@@ -135,7 +135,11 @@ function doPost(e) {
     }
 
     if (!isValidEmail_(data.email)) {
-      return reply_({ok:false,message:"Invalid email address."}, data);
+      return reply_({ok:false,message:"Invalid personal email address."}, data);
+    }
+
+    if (!isValidAouEmail_(data.university_email)) {
+      return reply_({ok:false,message:"Use a valid AOU email ending with @std.aou.edu.eg."}, data);
     }
 
     if (!isTrue_(data.commitment) || !isTrue_(data.accuracy) || !isTrue_(data.privacy)) {
@@ -145,20 +149,40 @@ function doPost(e) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName(SETTINGS.APPLICATIONS_SHEET);
     if (!sheet) throw new Error("Applications sheet not found. Run setup() first.");
+    ensureSchema_(sheet);
 
     const existing = findDuplicate_(sheet, String(data.student_id).trim(), String(data.email).trim().toLowerCase());
     if (existing) {
+      const existingRecord = getRowRecord_(sheet, existing.row);
+      const applicationId = existingRecord.application_id || makeApplicationId_();
+      const updatedRecord = Object.assign({}, existingRecord, data, {
+        application_id: applicationId,
+        server_received_at: existingRecord.server_received_at || new Date(),
+        last_submitted_at: new Date()
+      });
+
+      writeRecordToRow_(sheet, existing.row, updatedRecord);
+
+      try { sendApplicantReceipt_(updatedRecord, true); } catch (mailErr) { console.error(mailErr); }
+
+      const internalEmail = getInternalNotificationEmail_();
+      if (internalEmail) {
+        try { sendInternalNotification_(updatedRecord, internalEmail, true); } catch (mailErr) { console.error(mailErr); }
+      }
+
       return reply_({
         ok:true,
         duplicate:true,
-        application_id: existing.application_id,
-        message:"An application already exists for this student ID or email."
+        updated:true,
+        application_id:applicationId,
+        message:"Your existing application was updated."
       }, data);
     }
 
     const applicationId = makeApplicationId_();
     const record = Object.assign({}, data, {
       server_received_at: new Date(),
+      last_submitted_at: new Date(),
       application_id: applicationId,
       status: "New",
       reviewer: "",
@@ -166,16 +190,15 @@ function doPost(e) {
       review_notes: ""
     });
 
-    const row = HEADERS.map(h => sanitize_(record[h]));
-    sheet.appendRow(row);
+    appendRecord_(sheet, record);
 
     if (SETTINGS.SEND_APPLICANT_EMAIL) {
-      try { sendApplicantReceipt_(record); } catch (mailErr) { console.error(mailErr); }
+      try { sendApplicantReceipt_(record, false); } catch (mailErr) { console.error(mailErr); }
     }
 
-    const internalEmail = getConfigValue_("Internal Notification Email");
-    if (internalEmail && isValidEmail_(internalEmail)) {
-      try { sendInternalNotification_(record, internalEmail); } catch (mailErr) { console.error(mailErr); }
+    const internalEmail = getInternalNotificationEmail_();
+    if (internalEmail) {
+      try { sendInternalNotification_(record, internalEmail, false); } catch (mailErr) { console.error(mailErr); }
     }
 
     return reply_({ok:true,duplicate:false,application_id:applicationId}, data);
