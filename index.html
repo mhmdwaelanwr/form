@@ -3,7 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#F4EADF" />
+  <meta name="theme-color" content="#F7F4ED" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#171716" media="(prefers-color-scheme: dark)" />
+  <script>
+    (() => {
+      const pref = localStorage.getItem("cbc-theme") || "system";
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.themePreference = pref;
+      document.documentElement.dataset.theme =
+        pref === "system" ? (systemDark ? "dark" : "light") : pref;
+    })();
+  </script>
   <title>Hiring | Claude Builder Club — AOU Egypt</title>
   <meta name="description" content="Hiring the founding team for Claude Builder Club — AOU Egypt." />
   <meta property="og:title" content="Hiring | Claude Builder Club — AOU Egypt" />
@@ -22,8 +32,13 @@
       <nav class="nav-links" aria-label="Primary">
         <a href="#teams">Teams</a>
         <a href="#process">Process</a>
+        <a class="nav-whatsapp" href="https://chat.whatsapp.com/GwiXzxyBXTBDsBqeenPYP8" target="_blank" rel="noopener noreferrer">WhatsApp updates</a>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Change color theme" title="Theme: System">
+          <span class="theme-icon" aria-hidden="true">◐</span>
+          <span class="theme-label">System</span>
+        </button>
         <span class="nav-status" id="navStatus" hidden>Applications opening soon</span>
-        <button class="btn btn-dark js-apply nav-apply" data-open-label="Apply">Apply</button>
+        <button class="btn btn-primary js-apply nav-apply" data-open-label="Apply">Apply</button>
       </nav>
     </div>
   </header>
@@ -41,8 +56,9 @@
           AI experiences for students at AOU Egypt.
         </p>
         <div class="hero-actions">
-          <button class="btn btn-dark js-apply" data-open-label="Start application">Start application</button>
+          <button class="btn btn-primary js-apply" data-open-label="Start application">Start application</button>
           <a class="btn btn-ghost" href="#teams">Explore teams</a>
+          <a class="btn btn-whatsapp-outline" href="https://chat.whatsapp.com/GwiXzxyBXTBDsBqeenPYP8" target="_blank" rel="noopener noreferrer">Follow updates on WhatsApp ↗</a>
         </div>
       </div>
 
@@ -110,6 +126,11 @@
     </section>
   </main>
 
+  <a class="floating-whatsapp" href="https://chat.whatsapp.com/GwiXzxyBXTBDsBqeenPYP8" target="_blank" rel="noopener noreferrer" aria-label="Join recruitment updates on WhatsApp">
+    <span class="wa-dot" aria-hidden="true"></span>
+    <span><strong>Recruitment updates</strong><small>Join WhatsApp</small></span>
+  </a>
+
   <footer class="footer wrap">
     <div>
       <strong>Claude Builder Club — AOU Egypt</strong>
@@ -123,6 +144,7 @@
         <div>
           <small>FOUNDING TEAM APPLICATION</small>
           <h2 id="formTitle">Claude Builder Club — AOU Egypt</h2>
+          <div class="step-meta"><span id="stepCounter">Step 1 of 5</span><strong id="stepLabel">Profile</strong></div>
         </div>
         <button class="icon-btn" id="closeModal" aria-label="Close">×</button>
         <div class="progress"><span id="progress"></span></div>
@@ -137,7 +159,7 @@
             <label>Full name *<input name="full_name" required /></label>
             <label>AOU Student ID *<input name="student_id" required /></label>
             <label>Personal email *<input type="email" name="email" autocomplete="email" placeholder="you@example.com" required /></label>
-            <label>AOU university email *<input type="email" name="university_email" autocomplete="email" placeholder="student@std.aou.edu.eg" required /></label>
+            <label>AOU university email *<input type="email" name="university_email" autocomplete="email" placeholder="SXXXXXXXXEG@std.aou.edu.eg" pattern=".+@std\.aou\.edu\.eg$" title="Use your AOU student email ending with @std.aou.edu.eg" required /></label>
             <label>Phone / WhatsApp *<input name="phone" required /></label>
             <label>Faculty *
               <select name="faculty" id="facultySelect" required>
@@ -236,7 +258,7 @@
         <section class="form-page" data-page="5">
           <h3>Final check.</h3>
           <p>Founding team roles require consistency, communication and accountability.</p>
-          <label class="check"><input type="checkbox" name="commitment" required /><span>I understand this is a real operating role, not just a title or certificate.</span></label>
+          <label class="check"><input type="checkbox" name="commitment" required /><span>I understand this is an active operating role with real responsibilities, not just a title or certificate.</span></label>
           <label class="check"><input type="checkbox" name="accuracy" required /><span>I confirm the information in this application is accurate.</span></label>
           <label class="check"><input type="checkbox" name="privacy" required /><span>I agree that my application data may be reviewed by the recruitment team for selection purposes.</span></label>
           <label>Anything else we should know?<textarea name="notes"></textarea></label>
