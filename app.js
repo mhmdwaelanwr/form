@@ -1,17 +1,118 @@
 const CFG = window.CLUB_CONFIG || {};
 
+const ACADEMICS = {
+  "Faculty of Business Studies": [
+    "Business Studies — Accounting",
+    "Business Studies — Finance with Microfinance",
+    "Business Studies — Human Resource Management",
+    "Business Studies — Management Information Systems",
+    "Business Studies — Management",
+    "Business Studies — Marketing"
+  ],
+  "Faculty of Computer Studies": [
+    "Information Technology & Computing — Artificial Intelligence",
+    "Information Technology & Computing — Computer Science",
+    "Information Technology & Computing — Cybersecurity",
+    "Information Technology & Computing — Data Science",
+    "Information Technology & Computing — Web Development"
+  ],
+  "Faculty of Language Studies": [
+    "English Language & Literature",
+    "English Language, Literature & Translation"
+  ],
+  "Faculty of Education": [
+    "Arts & Education — English Language",
+    "Childhood & Education — Kindergarten",
+    "Science & Education — Mathematics"
+  ],
+  "Faculty of Media & Mass Communication": [
+    "Integrated Marketing Communication",
+    "Mass Communication — Radio & TV",
+    "News Journalism"
+  ],
+  "Graphic & Multimedia Design Technology": [
+    "Graphic & Multimedia Design Technology"
+  ]
+};
+
 const TEAMS = [
-  {name:"Vice President",cat:"LEADERSHIP",desc:"Co-leads the club and keeps teams aligned and accountable.",items:["Cross-team follow-up","Weekly board operations","President backup & escalation"]},
-  {name:"Secretary & Coordination",cat:"GOVERNANCE",desc:"Keeps the club organized, documented and ready for university processes.",items:["Minutes & records","Calendar & documentation","Official coordination"]},
-  {name:"Finance & Treasury",cat:"FINANCE",desc:"Tracks budgets, expenses, reimbursements and financial records.",items:["Budget tracking","Expense records","Funding documentation"]},
-  {name:"Technical Team",cat:"TECHNICAL",desc:"Owns workshops, demos, technical content and mentoring.",items:["AI / LLM Mentor","Backend / API Builder","Agents / MCP Builder","Cloud / DevOps Support"]},
-  {name:"Events & Operations",cat:"EXECUTION",desc:"Turns ideas into events that run smoothly.",items:["Logistics","Registration","Venue & equipment","Run-of-show"]},
-  {name:"Marketing & Media",cat:"BRAND",desc:"Builds the public identity and storytelling engine of the club.",items:["Graphic Design","Social Media","Content Writing","Photo / Video"]},
-  {name:"PR & Partnerships",cat:"EXTERNAL",desc:"Connects the club with speakers, communities, sponsors and collaborators.",items:["Sponsor outreach","Speaker relations","Club collaborations","External communications"]},
-  {name:"Community & Membership",cat:"PEOPLE",desc:"Keeps members engaged, supported and connected.",items:["Onboarding","Engagement","Feedback & retention","Member database"]},
-  {name:"Projects & Hackathons",cat:"BUILD",desc:"Helps members form teams, ship projects and prepare for challenges.",items:["Project coordination","Hackathon support","Demo Day","Team matching"]},
-  {name:"HR / People & Culture",cat:"PEOPLE OPS",desc:"Owns internal recruitment, interviews, performance follow-up and culture.",items:["Recruitment","Interview coordination","Performance follow-up","Recognition"]},
-  {name:"General Member / Volunteer",cat:"GENERAL",desc:"Contribute without taking a leadership role yet.",items:["Event volunteering","Project participation","Community support"]}
+  {
+    name:"Vice President",
+    cat:"LEADERSHIP",
+    desc:"Co-leads the club and keeps teams aligned and accountable.",
+    items:["Cross-team follow-up","Weekly board operations","President backup & escalation"],
+    roles:["Vice President"]
+  },
+  {
+    name:"Secretary & Coordination",
+    cat:"GOVERNANCE",
+    desc:"Keeps the club organized, documented and ready for university processes.",
+    items:["Minutes & records","Calendar & documentation","Official coordination"],
+    roles:["Secretary / Coordination Lead","Documentation Officer","Board Coordinator"]
+  },
+  {
+    name:"Finance & Treasury",
+    cat:"FINANCE",
+    desc:"Tracks budgets, expenses, reimbursements and financial records.",
+    items:["Budget tracking","Expense records","Funding documentation"],
+    roles:["Treasurer / Finance Lead","Finance Coordinator","Finance Member"]
+  },
+  {
+    name:"Technical Team",
+    cat:"TECHNICAL",
+    desc:"Owns workshops, demos, technical content and mentoring.",
+    items:["AI / LLM","Backend / API","Agents / MCP","Cloud / DevOps"],
+    roles:["Head of Technical","Vice Head of Technical","AI / LLM Mentor","Backend / API Builder","Agents / MCP Builder","Cloud / DevOps Support","Technical Content Member","Technical Member"]
+  },
+  {
+    name:"Events & Operations",
+    cat:"EXECUTION",
+    desc:"Turns ideas into events that run smoothly.",
+    items:["Logistics","Registration","Venue & equipment","Run-of-show"],
+    roles:["Head of Events & Operations","Vice Head of Events & Operations","Event Coordinator","Logistics Coordinator","Registration Coordinator","Venue & Equipment Coordinator","Operations Member"]
+  },
+  {
+    name:"Marketing & Media",
+    cat:"BRAND",
+    desc:"Builds the public identity and storytelling engine of the club.",
+    items:["Design","Social Media","Content","Photo / Video"],
+    roles:["Head of Marketing & Media","Vice Head of Marketing & Media","Graphic Designer","Social Media Specialist","Content Writer / Copywriter","Photographer / Videographer","Video Editor","Marketing Member"]
+  },
+  {
+    name:"PR & Partnerships",
+    cat:"EXTERNAL",
+    desc:"Connects the club with speakers, communities, sponsors and collaborators.",
+    items:["Sponsor outreach","Speaker relations","Club collaborations","External communications"],
+    roles:["Head of PR & Partnerships","Vice Head of PR & Partnerships","PR & Outreach Coordinator","Partnerships Coordinator","Sponsorships Coordinator","Speaker Relations Coordinator","External Relations Member"]
+  },
+  {
+    name:"Community & Membership",
+    cat:"PEOPLE",
+    desc:"Keeps members engaged, supported and connected.",
+    items:["Onboarding","Engagement","Feedback & retention","Member database"],
+    roles:["Head of Community & Membership","Vice Head of Community & Membership","Community Coordinator","Membership & Onboarding Coordinator","Engagement Coordinator","Feedback & Retention Coordinator","Community Member"]
+  },
+  {
+    name:"Projects & Hackathons",
+    cat:"BUILD",
+    desc:"Helps members form teams, ship projects and prepare for challenges.",
+    items:["Project coordination","Hackathon support","Demo Day","Team matching"],
+    roles:["Head of Projects & Hackathons","Vice Head of Projects & Hackathons","Project Coordinator","Hackathon Coordinator","Demo Day Coordinator","Team Matching / Mentorship Coordinator","Projects Member"]
+  },
+  {
+    name:"HR / People & Culture",
+    cat:"PEOPLE OPS",
+    desc:"Owns internal recruitment, interviews, performance follow-up and culture.",
+    items:["Recruitment","Interview coordination","Performance follow-up","Recognition"],
+    roles:["Head of HR / People & Culture","Vice Head of HR / People & Culture","Recruitment Coordinator","Interview Coordinator","Performance & Culture Coordinator","HR Member"]
+  },
+  {
+    name:"General Member / Volunteer",
+    cat:"GENERAL",
+    desc:"Contribute without taking a leadership role yet.",
+    items:["Event volunteering","Project participation","Community support"],
+    roles:["General Member","Event Volunteer","Technical Volunteer","Media Volunteer","Community Volunteer"]
+  }
 ];
 
 const QUESTIONS = {
@@ -19,8 +120,12 @@ const QUESTIONS = {
     ["leadership_exp","Tell us about a time you coordinated multiple people or teams.","textarea"],
     ["vp_priority","What should a Vice President protect most: speed, quality, team health, or accountability? Why?","textarea"]
   ],
-  "Secretary & Coordination":[["coord_exp","How do you keep meetings, tasks and documentation organized?","textarea"]],
-  "Finance & Treasury":[["finance_exp","What tools or methods would you use to track club expenses?","textarea"]],
+  "Secretary & Coordination":[
+    ["coord_exp","How do you keep meetings, tasks and documentation organized?","textarea"]
+  ],
+  "Finance & Treasury":[
+    ["finance_exp","What tools or methods would you use to track club expenses?","textarea"]
+  ],
   "Technical Team":[
     ["technical_stack","What technologies are you strongest in?","input"],
     ["technical_demo","Describe one AI/software project you could demo to students.","textarea"]
@@ -49,7 +154,9 @@ const QUESTIONS = {
     ["people_exp","What experience do you have with recruitment, interviews or team coordination?","textarea"],
     ["conflict","How would you handle conflict between two strong team members?","textarea"]
   ],
-  "General Member / Volunteer":[["volunteer_interest","Which activities would you most like to support?","textarea"]]
+  "General Member / Volunteer":[
+    ["volunteer_interest","Which activities would you most like to support?","textarea"]
+  ]
 };
 
 const modal = document.querySelector("#modal");
@@ -57,11 +164,15 @@ const form = document.querySelector("#applicationForm");
 const progress = document.querySelector("#progress");
 const backBtn = document.querySelector("#backBtn");
 const nextBtn = document.querySelector("#nextBtn");
+const facultySelect = document.querySelector("#facultySelect");
+const majorSelect = document.querySelector("#majorSelect");
 const teamFirst = document.querySelector("#teamFirst");
 const teamSecond = document.querySelector("#teamSecond");
+const roleFirst = document.querySelector("#roleFirst");
+const roleSecond = document.querySelector("#roleSecond");
 const conditional = document.querySelector("#conditional");
 const success = document.querySelector("#success");
-const launchNote = document.querySelector("#launchNote");
+
 let currentPage = 1;
 let latestSubmission = null;
 
@@ -76,10 +187,48 @@ function renderRoles(){
   `).join("");
 }
 
+function fillAcademicFaculties(){
+  facultySelect.innerHTML =
+    '<option value="">Select your faculty</option>' +
+    Object.keys(ACADEMICS).map(name => `<option value="${name}">${name}</option>`).join("");
+}
+
+function fillMajors(faculty){
+  const majors = ACADEMICS[faculty] || [];
+  majorSelect.disabled = majors.length === 0;
+  majorSelect.innerHTML = majors.length
+    ? '<option value="">Select your programme / major</option>' +
+      majors.map(name => `<option value="${name}">${name}</option>`).join("")
+    : '<option value="">Choose a faculty first</option>';
+}
+
 function fillTeams(){
-  const html = `<option value="">Select a team</option>` + TEAMS.map(t=>`<option>${t.name}</option>`).join("");
+  const html =
+    '<option value="">Select a team</option>' +
+    TEAMS.map(t => `<option value="${t.name}">${t.name}</option>`).join("");
   teamFirst.innerHTML = html;
   teamSecond.innerHTML = html;
+}
+
+function fillRoles(teamName, select){
+  const team = TEAMS.find(t => t.name === teamName);
+  const roles = team?.roles || [];
+  select.disabled = roles.length === 0;
+  select.innerHTML = roles.length
+    ? '<option value="">Select a role</option>' +
+      roles.map(role => `<option value="${role}">${role}</option>`).join("")
+    : '<option value="">Choose a team first</option>';
+}
+
+function renderTeamQuestions(teamName){
+  const qs = QUESTIONS[teamName] || [];
+  conditional.innerHTML = qs.map(([name,label,type]) => `
+    <label>${label} *
+      ${type==="textarea"
+        ? `<textarea name="${name}" required></textarea>`
+        : `<input name="${name}" required />`}
+    </label>
+  `).join("");
 }
 
 function recruitmentOpen(){
@@ -132,22 +281,33 @@ function openModal(){
   modal.setAttribute("aria-hidden","false");
   document.body.style.overflow="hidden";
 }
+
 function closeModal(){
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden","true");
   document.body.style.overflow="";
 }
+
 document.querySelectorAll(".js-apply").forEach(b=>b.addEventListener("click",openModal));
 document.querySelector("#closeModal").addEventListener("click",closeModal);
 modal.addEventListener("click",e=>{ if(e.target===modal) closeModal(); });
 
+facultySelect.addEventListener("change",()=>{
+  fillMajors(facultySelect.value);
+});
+
 teamFirst.addEventListener("change",()=>{
-  const qs = QUESTIONS[teamFirst.value] || [];
-  conditional.innerHTML = qs.map(([name,label,type]) => `
-    <label>${label} *
-      ${type==="textarea" ? `<textarea name="${name}" required></textarea>` : `<input name="${name}" required />`}
-    </label>
-  `).join("");
+  fillRoles(teamFirst.value, roleFirst);
+  renderTeamQuestions(teamFirst.value);
+
+  if(teamSecond.value === teamFirst.value){
+    teamSecond.value = "";
+    fillRoles("", roleSecond);
+  }
+});
+
+teamSecond.addEventListener("change",()=>{
+  fillRoles(teamSecond.value, roleSecond);
 });
 
 function showPage(n){
@@ -169,11 +329,13 @@ function validateCurrentPage(){
       return false;
     }
   }
+
   if(currentPage===2 && teamFirst.value && teamFirst.value===teamSecond.value){
     alert("Please choose two different team preferences.");
     teamSecond.focus();
     return false;
   }
+
   return true;
 }
 
@@ -187,10 +349,28 @@ nextBtn.addEventListener("click",()=>{
 function formObject(){
   const fd = new FormData(form);
   const data = {};
-  for(const [k,v] of fd.entries()) data[k] = v==="on" ? true : String(v).trim();
+  for(const [k,v] of fd.entries()){
+    data[k] = v==="on" ? true : String(v).trim();
+  }
+
+  const faculty = data.faculty || "";
+  const major = data.major || "";
+  const firstRole = data.preferred_role || "";
+  const secondRole = data.second_preferred_role || "";
+
+  // Keep compatibility with the already-deployed Apps Script schema.
+  data.major = faculty && major ? `${faculty} — ${major}` : major;
+  data.preferred_role = secondRole
+    ? `1st: ${firstRole} | 2nd: ${secondRole}`
+    : firstRole;
+
+  delete data.faculty;
+  delete data.second_preferred_role;
+
   data.client_submitted_at = new Date().toISOString();
   data.user_agent = navigator.userAgent;
-  data.form_version = "CBC-AOU-Founding-Team-v2";
+  data.form_version = "CBC-AOU-Founding-Team-v3";
+
   return data;
 }
 
@@ -203,8 +383,11 @@ async function submitApplication(){
   nextBtn.disabled = true;
   nextBtn.textContent = "Submitting...";
 
+  const displayTeam = teamFirst.value;
+  const displayRole = roleFirst.value;
   const payload = formObject();
   const nonce = "cbc-" + Date.now() + "-" + Math.random().toString(36).slice(2, 12);
+
   payload._transport = "iframe";
   payload._nonce = nonce;
 
@@ -251,10 +434,14 @@ async function submitApplication(){
 
     const appId = result.application_id || "Submitted";
     document.querySelector("#applicationId").textContent = appId;
-    document.querySelector("#successMessage").textContent =
-      result.duplicate
-        ? "We already have an application with this Student ID or email. Your existing application was not duplicated."
-        : "Thank you. Keep your application ID for reference.";
+    document.querySelector("#successTeam").textContent =
+      displayRole ? `${displayTeam} · ${displayRole}` : displayTeam;
+
+    document.querySelector("#successMessage").textContent = result.duplicate
+      ? "We already have an application with this Student ID or email, so we kept your original application instead of creating a duplicate."
+      : "Your application to the Claude Builder Club — AOU Egypt founding team has been received successfully.";
+
+    document.querySelector(".modal-card").scrollTop = 0;
   };
 
   try{
@@ -301,11 +488,19 @@ document.querySelector("#downloadCopy").addEventListener("click",()=>{
   const blob = new Blob([JSON.stringify(latestSubmission,null,2)],{type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href=url; a.download=`${safeName}_application.json`; a.click();
+  a.href=url;
+  a.download=`${safeName}_application.json`;
+  a.click();
   URL.revokeObjectURL(url);
 });
 
+document.querySelector("#closeSuccess").addEventListener("click", closeModal);
+
 renderRoles();
+fillAcademicFaculties();
+fillMajors("");
 fillTeams();
+fillRoles("", roleFirst);
+fillRoles("", roleSecond);
 showPage(1);
 setLaunchState();
