@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap');
+
 :root{
   --bg:#f7f5f2;
   --paper:#ffffff;
@@ -548,4 +550,259 @@ textarea{min-height:118px;resize:vertical}
     flex-direction:column;
   }
   .btn-whatsapp{width:100%;white-space:normal}
+}
+
+
+/* =========================================================
+   Claude-inspired adaptive design system
+   Public web fonts only; system theme is respected by default.
+   ========================================================= */
+:root{
+  color-scheme:light;
+  --bg:#f7f4ed;
+  --paper:#fcfaf6;
+  --surface:#ffffff;
+  --surface-2:#f1ede5;
+  --ink:#181714;
+  --muted:#6c685f;
+  --line:#ded8cf;
+  --accent:#c96442;
+  --accent-dark:#a94e31;
+  --accent-soft:#f3dfd4;
+  --dark:#1c1b19;
+  --green:#19734a;
+  --focus:rgba(201,100,66,.18);
+  --shadow:0 18px 55px rgba(45,35,27,.09);
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#171716;
+  --paper:#1c1b19;
+  --surface:#22211f;
+  --surface-2:#2a2825;
+  --ink:#f3efe7;
+  --muted:#aaa49a;
+  --line:#3b3833;
+  --accent:#e07a56;
+  --accent-dark:#ed936f;
+  --accent-soft:#3b2921;
+  --dark:#f1ede5;
+  --green:#5fcb91;
+  --focus:rgba(224,122,86,.22);
+  --shadow:0 20px 65px rgba(0,0,0,.28);
+}
+body{
+  font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 82% -8%,rgba(201,100,66,.09),transparent 31rem),
+    var(--bg);
+  color:var(--ink);
+  transition:background-color .22s ease,color .22s ease;
+}
+h1,.hero-club-name,.section-head h2,.cta h2,.success h3{
+  font-family:"Newsreader",Georgia,serif;
+  font-optical-sizing:auto;
+}
+h1{
+  font-weight:600;
+  letter-spacing:-.045em;
+}
+.hero-club-name{
+  font-weight:600;
+  letter-spacing:-.025em;
+}
+.eyebrow,.panel-kicker,.role small,.success-kicker,
+label,.stats span,.success-summary span{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;
+}
+
+/* Surfaces */
+.nav{
+  background:color-mix(in srgb,var(--bg) 90%,transparent);
+  border-color:var(--line);
+}
+.hero-panel,.cta{
+  background:#1c1b19;
+}
+html[data-theme="dark"] .hero-panel,
+html[data-theme="dark"] .cta{
+  background:#0f0f0e;
+}
+.stats div,.role,.btn-ghost,.nav-status,.hero-status,
+.modal-card,.modal-head,input,select,textarea,.check,
+.preference-card-secondary,.success-summary>div{
+  background:var(--surface);
+  border-color:var(--line);
+  color:var(--ink);
+}
+.preference-card,.section-soft{
+  background:var(--paper);
+  border-color:var(--line);
+}
+.section-soft{border-color:var(--line)}
+input::placeholder,textarea::placeholder{color:color-mix(in srgb,var(--muted) 75%,transparent)}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--focus);
+}
+
+/* Primary CTA */
+.btn-primary{
+  background:var(--ink);
+  color:var(--bg);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+}
+.btn-primary:hover:not(:disabled){box-shadow:0 11px 28px rgba(0,0,0,.17)}
+html[data-theme="dark"] .btn-primary{
+  background:var(--accent);
+  color:#171210;
+}
+.btn-ghost:hover{background:var(--surface-2)}
+
+/* Theme control */
+.theme-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:36px;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--surface);
+  color:var(--ink);
+  font:600 11px/1 "IBM Plex Sans",sans-serif;
+  cursor:pointer;
+}
+.theme-icon{
+  display:grid;
+  place-items:center;
+  width:20px;height:20px;
+  border-radius:50%;
+  background:var(--surface-2);
+  font-size:13px;
+}
+.theme-toggle:hover{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+
+/* WhatsApp visibility */
+.nav-whatsapp{
+  display:inline-flex!important;
+  color:var(--green)!important;
+  font-size:12px!important;
+  white-space:nowrap;
+}
+.btn-whatsapp-outline{
+  border:1px solid color-mix(in srgb,var(--green) 38%,var(--line));
+  color:var(--green);
+  background:color-mix(in srgb,var(--green) 6%,var(--surface));
+  text-decoration:none;
+}
+.btn-whatsapp-outline:hover{
+  background:color-mix(in srgb,var(--green) 11%,var(--surface));
+}
+.floating-whatsapp{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:55;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px 14px;
+  border:1px solid color-mix(in srgb,var(--green) 35%,var(--line));
+  border-radius:16px;
+  background:color-mix(in srgb,var(--surface) 94%,var(--green) 6%);
+  color:var(--ink);
+  box-shadow:0 14px 40px rgba(0,0,0,.14);
+  text-decoration:none;
+  backdrop-filter:blur(12px);
+}
+.floating-whatsapp .wa-dot{
+  width:12px;height:12px;border-radius:50%;
+  background:#25d366;
+  box-shadow:0 0 0 5px rgba(37,211,102,.13);
+}
+.floating-whatsapp strong,.floating-whatsapp small{display:block}
+.floating-whatsapp strong{font-size:12px}
+.floating-whatsapp small{font-size:10px;color:var(--muted);margin-top:1px}
+.whatsapp-follow{
+  background:color-mix(in srgb,var(--green) 6%,var(--surface));
+  border-color:color-mix(in srgb,var(--green) 30%,var(--line));
+}
+.whatsapp-follow strong{color:var(--green)}
+.whatsapp-follow span{color:var(--muted)}
+.btn-whatsapp{background:#1f8f55;color:#fff}
+
+/* Form progress hierarchy */
+.step-meta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:7px;
+  color:var(--muted);
+  font-size:11px;
+}
+.step-meta strong{color:var(--ink);font-weight:700}
+.progress{background:var(--surface-2)}
+.form-page h3{
+  font-family:"Newsreader",Georgia,serif;
+  font-size:31px;
+  font-weight:600;
+}
+.preference-number{
+  background:var(--ink);
+  color:var(--bg);
+}
+.success-next{
+  background:color-mix(in srgb,var(--accent) 7%,var(--surface));
+  border-left-color:var(--accent);
+}
+.success-next p,.success-lead,.success-note{color:var(--muted)}
+
+/* Dark-mode browser-friendly details */
+html[data-theme="dark"] .hero-status{
+  background:var(--surface);
+  border-color:var(--line);
+  color:var(--muted);
+}
+html[data-theme="dark"] .success-icon{background:#163526}
+html[data-theme="dark"] .application-id{background:var(--surface-2);border-color:var(--line)}
+
+/* Smooth modal + loading feedback */
+.modal-card{animation:cbcModalIn .18s ease-out}
+@keyframes cbcModalIn{
+  from{opacity:0;transform:translateY(8px) scale(.992)}
+  to{opacity:1;transform:none}
+}
+.btn.is-loading::before{
+  content:"";
+  width:14px;height:14px;
+  margin-right:8px;
+  border:2px solid currentColor;
+  border-right-color:transparent;
+  border-radius:50%;
+  animation:cbcSpin .7s linear infinite;
+}
+@keyframes cbcSpin{to{transform:rotate(360deg)}}
+
+/* Mobile refinements */
+@media(max-width:900px){
+  .nav-whatsapp{display:none!important}
+  .theme-label{display:none}
+}
+@media(max-width:620px){
+  body{padding-bottom:76px}
+  .theme-toggle{width:38px;height:38px;padding:0;justify-content:center}
+  .theme-icon{background:transparent}
+  .floating-whatsapp{
+    left:12px;
+    right:12px;
+    bottom:10px;
+    justify-content:center;
+    border-radius:14px;
+  }
+  .floating-whatsapp small{display:none}
+  .hero-actions .btn-whatsapp-outline{order:3}
+  h1{font-size:46px}
+  .hero-club-name{font-size:27px}
+  .form-page h3{font-size:29px}
 }
