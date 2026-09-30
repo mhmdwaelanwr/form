@@ -19,7 +19,9 @@ const SETTINGS = {
   APPLICATIONS_SHEET: "Applications",
   CONFIG_SHEET: "Config",
   SEND_APPLICANT_EMAIL: true,
-  CLUB_NAME: "Claude Builder Club — AOU Egypt"
+  CLUB_NAME: "Claude Builder Club — AOU Egypt",
+  CLUB_EMAIL: "claudebuilder.aou@gmail.com",
+  WHATSAPP_URL: "https://chat.whatsapp.com/GwiXzxyBXTBDsBqeenPYP8"
 };
 
 const HEADERS = [
@@ -73,7 +75,14 @@ const HEADERS = [
   "volunteer_interest",
   "client_submitted_at",
   "form_version",
-  "user_agent"
+  "user_agent",
+  "faculty",
+  "programme_major",
+  "university_email",
+  "preferred_role_first",
+  "preferred_role_second",
+  "submission_reference",
+  "last_submitted_at"
 ];
 
 function setup() {
