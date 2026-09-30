@@ -59,8 +59,8 @@
     </section>
 
     <section class="stats wrap">
-      <div><strong>10</strong><span>Core teams</span></div>
-      <div><strong>25+</strong><span>Founding roles</span></div>
+      <div><strong>11</strong><span>Core teams</span></div>
+      <div><strong>50+</strong><span>Role paths</span></div>
       <div><strong>1</strong><span>Founding cohort</span></div>
       <div><strong>100%</strong><span>Student-led</span></div>
     </section>
@@ -138,7 +138,16 @@
             <label>AOU Student ID *<input name="student_id" required /></label>
             <label>University email *<input type="email" name="email" required /></label>
             <label>Phone / WhatsApp *<input name="phone" required /></label>
-            <label>Major *<input name="major" placeholder="e.g. Computer Science" required /></label>
+            <label>Faculty *
+              <select name="faculty" id="facultySelect" required>
+                <option value="">Select your faculty</option>
+              </select>
+            </label>
+            <label>Programme / Major *
+              <select name="major" id="majorSelect" required disabled>
+                <option value="">Choose a faculty first</option>
+              </select>
+            </label>
             <label>Academic year *
               <select name="academic_year" required>
                 <option value="">Select</option>
@@ -152,11 +161,32 @@
         <section class="form-page" data-page="2">
           <h3>Where do you want to contribute?</h3>
           <p>Choose a first and second preference. Pick based on real interest, not title.</p>
-          <div class="grid2">
-            <label>First preference *<select name="team_first" id="teamFirst" required></select></label>
-            <label>Second preference *<select name="team_second" id="teamSecond" required></select></label>
+          <div class="preference-card">
+            <div class="preference-number">01</div>
+            <div class="grid2">
+              <label>First preference *
+                <select name="team_first" id="teamFirst" required></select>
+              </label>
+              <label>Preferred role *
+                <select name="preferred_role" id="roleFirst" required disabled>
+                  <option value="">Choose a team first</option>
+                </select>
+              </label>
+            </div>
           </div>
-          <label>Preferred role *<input name="preferred_role" placeholder="e.g. Graphic Designer, Technical Member, Head of Events" required /></label>
+          <div class="preference-card preference-card-secondary">
+            <div class="preference-number">02</div>
+            <div class="grid2">
+              <label>Second preference *
+                <select name="team_second" id="teamSecond" required></select>
+              </label>
+              <label>Preferred role *
+                <select name="second_preferred_role" id="roleSecond" required disabled>
+                  <option value="">Choose a team first</option>
+                </select>
+              </label>
+            </div>
+          </div>
           <div class="grid2">
             <label>Weekly availability *
               <select name="availability" required>
@@ -219,10 +249,34 @@
 
       <div class="success" id="success">
         <div class="success-icon">✓</div>
-        <h3>Application received.</h3>
-        <p id="successMessage">Thank you. Keep your application ID for reference.</p>
-        <div class="application-id" id="applicationId"></div>
-        <button class="btn btn-dark" id="downloadCopy">Download application copy</button>
+        <div class="success-kicker">APPLICATION SUBMITTED</div>
+        <h3>Thank you for applying.</h3>
+        <p class="success-lead" id="successMessage">
+          Your application to the Claude Builder Club — AOU Egypt founding team has been received successfully.
+        </p>
+
+        <div class="success-summary">
+          <div>
+            <span>Application ID</span>
+            <strong id="applicationId">—</strong>
+          </div>
+          <div>
+            <span>First preference</span>
+            <strong id="successTeam">—</strong>
+          </div>
+        </div>
+
+        <div class="success-next">
+          <strong>What happens next?</strong>
+          <p>Our recruitment team will review your application. If your profile is shortlisted, we’ll contact you using the email or phone number you submitted with the next step and interview details.</p>
+        </div>
+
+        <p class="success-note">A confirmation email should arrive shortly. Please keep your Application ID for reference.</p>
+
+        <div class="success-actions">
+          <button class="btn btn-dark" id="downloadCopy">Download application copy</button>
+          <button class="btn btn-ghost" type="button" id="closeSuccess">Back to site</button>
+        </div>
       </div>
     </div>
   </div>
