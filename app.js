@@ -94,18 +94,36 @@ function recruitmentOpen(){
 
 function setLaunchState(){
   const open = recruitmentOpen();
+  const statusText = open
+    ? "Applications are open"
+    : (CFG.IS_LIVE ? "Applications are currently closed" : "Applications opening soon");
+
   document.querySelectorAll(".js-apply").forEach(b=>{
-    b.disabled = !open;
-    if(!open) b.textContent = CFG.IS_LIVE ? "Applications closed" : "Recruitment opens soon";
+    if(open){
+      b.hidden = false;
+      b.disabled = false;
+      b.textContent = b.dataset.openLabel || "Apply";
+    }else{
+      b.hidden = true;
+    }
   });
-  if(!open){
-    launchNote.hidden = false;
-    launchNote.textContent = CFG.IS_LIVE
-      ? "Applications are currently closed."
-      : "The recruitment site is ready. Applications will open when the club officially launches.";
+
+  const navStatus = document.querySelector("#navStatus");
+  if(navStatus){
+    navStatus.hidden = open;
+    navStatus.textContent = statusText;
   }
+
+  const heroStatus = document.querySelector("#heroStatus");
+  if(heroStatus){
+    heroStatus.textContent = statusText;
+    heroStatus.classList.toggle("live", open);
+  }
+
   const footerMeta = document.querySelector("#footerMeta");
-  if(CFG.CONTACT_EMAIL) footerMeta.textContent = `Founding Team Recruitment · ${CFG.CONTACT_EMAIL}`;
+  if(CFG.CONTACT_EMAIL){
+    footerMeta.textContent = `Founding Team Recruitment · ${CFG.CONTACT_EMAIL}`;
+  }
 }
 
 function openModal(){
