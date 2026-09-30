@@ -176,6 +176,47 @@ const success = document.querySelector("#success");
 let currentPage = 1;
 let latestSubmission = null;
 
+const STEP_LABELS = ["Profile","Preferences","Experience","Motivation","Review"];
+const DRAFT_KEY = "cbc-aou-hiring-draft-v1";
+const THEME_KEY = "cbc-theme";
+const themeToggle = document.querySelector("#themeToggle");
+const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+
+function resolvedTheme(preference){
+  if(preference === "light" || preference === "dark") return preference;
+  return themeMedia.matches ? "dark" : "light";
+}
+
+function applyTheme(preference){
+  const pref = preference || "system";
+  const actual = resolvedTheme(pref);
+  document.documentElement.dataset.themePreference = pref;
+  document.documentElement.dataset.theme = actual;
+
+  if(themeToggle){
+    const label = themeToggle.querySelector(".theme-label");
+    const icon = themeToggle.querySelector(".theme-icon");
+    const text = pref === "system" ? "System" : (pref === "dark" ? "Dark" : "Light");
+    if(label) label.textContent = text;
+    if(icon) icon.textContent = pref === "system" ? "◐" : (actual === "dark" ? "☾" : "☀");
+    themeToggle.title = "Theme: " + text + " · tap to change";
+    themeToggle.setAttribute("aria-label","Theme: " + text + ". Tap to change.");
+  }
+}
+
+function cycleTheme(){
+  const current = localStorage.getItem(THEME_KEY) || "system";
+  const next = current === "system" ? "light" : (current === "light" ? "dark" : "system");
+  localStorage.setItem(THEME_KEY,next);
+  applyTheme(next);
+}
+
+if(themeToggle) themeToggle.addEventListener("click",cycleTheme);
+themeMedia.addEventListener?.("change",()=>{
+  if((localStorage.getItem(THEME_KEY) || "system") === "system") applyTheme("system");
+});
+applyTheme(localStorage.getItem(THEME_KEY) || "system");
+
 function renderRoles(){
   document.querySelector("#rolesGrid").innerHTML = TEAMS.map(t => `
     <article class="role">
@@ -294,6 +335,7 @@ modal.addEventListener("click",e=>{ if(e.target===modal) closeModal(); });
 
 facultySelect.addEventListener("change",()=>{
   fillMajors(facultySelect.value);
+  saveDraft();
 });
 
 teamFirst.addEventListener("change",()=>{
@@ -304,10 +346,12 @@ teamFirst.addEventListener("change",()=>{
     teamSecond.value = "";
     fillRoles("", roleSecond);
   }
+  saveDraft();
 });
 
 teamSecond.addEventListener("change",()=>{
   fillRoles(teamSecond.value, roleSecond);
+  saveDraft();
 });
 
 function showPage(n){
@@ -317,6 +361,12 @@ function showPage(n){
   progress.style.width = `${n*20}%`;
   backBtn.style.visibility = n===1 ? "hidden":"visible";
   nextBtn.textContent = n===5 ? "Submit application →":"Continue →";
+
+  const stepCounter = document.querySelector("#stepCounter");
+  const stepLabel = document.querySelector("#stepLabel");
+  if(stepCounter) stepCounter.textContent = `Step ${n} of 5`;
+  if(stepLabel) stepLabel.textContent = STEP_LABELS[n-1] || "";
+
   document.querySelector(".modal-card").scrollTop=0;
 }
 
@@ -357,30 +407,79 @@ function formObject(){
   const major = data.major || "";
   const firstRole = data.preferred_role || "";
   const secondRole = data.second_preferred_role || "";
-  const universityEmail = data.university_email || "";
 
-  // Keep compatibility with the already-deployed Apps Script schema.
+  // Combined compatibility fields for the currently deployed backend.
   data.major = faculty && major ? `${faculty} — ${major}` : major;
   data.preferred_role = secondRole
     ? `1st: ${firstRole} | 2nd: ${secondRole}`
     : firstRole;
 
-  const existingNotes = data.notes || "";
-  data.notes = [
-    universityEmail ? "AOU university email: " + universityEmail : "",
-    existingNotes
-  ].filter(Boolean).join("\n");
-
-  delete data.faculty;
-  delete data.second_preferred_role;
-  delete data.university_email;
+  // Structured fields used by the upgraded backend.
+  data.faculty = faculty;
+  data.programme_major = major;
+  data.preferred_role_first = firstRole;
+  data.preferred_role_second = secondRole;
 
   data.client_submitted_at = new Date().toISOString();
   data.user_agent = navigator.userAgent;
-  data.form_version = "CBC-AOU-Founding-Team-v3";
+  data.form_version = "CBC-AOU-Founding-Team-v4";
 
   return data;
 }
+
+function draftData(){
+  const fd = new FormData(form);
+  const out = {};
+  for(const [k,v] of fd.entries()) out[k] = v === "on" ? true : String(v);
+  return out;
+}
+
+function saveDraft(){
+  try{
+    localStorage.setItem(DRAFT_KEY,JSON.stringify(draftData()));
+  }catch(_){}
+}
+
+function clearDraft(){
+  try{ localStorage.removeItem(DRAFT_KEY); }catch(_){}
+}
+
+function restoreDraft(){
+  let draft = null;
+  try{ draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); }catch(_){}
+  if(!draft || typeof draft !== "object") return;
+
+  if(draft.faculty){
+    facultySelect.value = draft.faculty;
+    fillMajors(draft.faculty);
+  }
+  if(draft.major) majorSelect.value = draft.major;
+
+  if(draft.team_first){
+    teamFirst.value = draft.team_first;
+    fillRoles(draft.team_first,roleFirst);
+    renderTeamQuestions(draft.team_first);
+  }
+  if(draft.preferred_role) roleFirst.value = draft.preferred_role;
+
+  if(draft.team_second){
+    teamSecond.value = draft.team_second;
+    fillRoles(draft.team_second,roleSecond);
+  }
+  if(draft.second_preferred_role) roleSecond.value = draft.second_preferred_role;
+
+  Object.entries(draft).forEach(([name,value])=>{
+    const el = form.elements.namedItem(name);
+    if(!el) return;
+    if(el.type === "checkbox") el.checked = Boolean(value);
+    else if(!["faculty","major","team_first","team_second","preferred_role","second_preferred_role"].includes(name)){
+      el.value = value;
+    }
+  });
+}
+
+form.addEventListener("input",saveDraft);
+form.addEventListener("change",saveDraft);
 
 async function submitApplication(){
   if(!recruitmentOpen()){
@@ -389,7 +488,8 @@ async function submitApplication(){
   }
 
   nextBtn.disabled = true;
-  nextBtn.textContent = "Submitting securely...";
+  nextBtn.classList.add("is-loading");
+  nextBtn.textContent = "Submitting";
 
   const displayTeam = teamFirst.value;
   const displayRole = roleFirst.value;
@@ -400,51 +500,86 @@ async function submitApplication(){
     "-" +
     Math.random().toString(36).slice(2,8).toUpperCase();
 
-  payload.notes = [
-    "Submission reference: " + submissionReference,
-    payload.notes || ""
-  ].filter(Boolean).join("\n");
+  payload.submission_reference = submissionReference;
+  latestSubmission = {...payload};
 
-  latestSubmission = {...payload, submission_reference:submissionReference};
+  let iframe = null;
+  let transportForm = null;
+  let timer = null;
+  let finished = false;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(()=>controller.abort(), 15000);
+  const cleanup = () => {
+    if(timer) clearTimeout(timer);
+    if(transportForm) transportForm.remove();
+    if(iframe) iframe.remove();
+  };
 
-  try{
-    await fetch(CFG.SUBMISSION_ENDPOINT,{
-      method:"POST",
-      mode:"no-cors",
-      cache:"no-store",
-      headers:{"Content-Type":"text/plain;charset=UTF-8"},
-      body:JSON.stringify(payload),
-      signal:controller.signal
-    });
+  const finishButton = () => {
+    nextBtn.disabled = false;
+    nextBtn.classList.remove("is-loading");
+    nextBtn.textContent = "Submit application →";
+  };
 
-    clearTimeout(timeout);
+  const showSuccess = () => {
+    if(finished) return;
+    finished = true;
+    cleanup();
+    finishButton();
+    clearDraft();
 
     form.style.display = "none";
     success.classList.add("show");
-
     document.querySelector("#submissionReference").textContent = submissionReference;
     document.querySelector("#successTeam").textContent =
       displayRole ? `${displayTeam} · ${displayRole}` : displayTeam;
-
     document.querySelector("#successMessage").textContent =
-      "Your application to the Claude Builder Club — AOU Egypt founding team has been sent successfully.";
-
+      "Your application to the Claude Builder Club — AOU Egypt founding team has been received for processing.";
     document.querySelector(".modal-card").scrollTop = 0;
-  }catch(err){
-    clearTimeout(timeout);
-    console.error(err);
+  };
 
-    if(err && err.name === "AbortError"){
-      alert("The connection took too long. Please switch networks or try again in a moment.");
-    }else{
-      alert("We could not send your application. Please check your connection and try again.");
-    }
-  }finally{
-    nextBtn.disabled = false;
-    nextBtn.textContent = "Submit application →";
+  try{
+    iframe = document.createElement("iframe");
+    iframe.name = "cbc-submit-" + Date.now();
+    iframe.srcdoc = "<!doctype html><title>ready</title>";
+    iframe.hidden = true;
+    iframe.setAttribute("aria-hidden","true");
+    document.body.appendChild(iframe);
+
+    await new Promise(resolve=>{
+      const ready = () => resolve();
+      iframe.addEventListener("load",ready,{once:true});
+      setTimeout(resolve,250);
+    });
+
+    iframe.addEventListener("load",showSuccess,{once:true});
+
+    transportForm = document.createElement("form");
+    transportForm.method = "POST";
+    transportForm.action = CFG.SUBMISSION_ENDPOINT;
+    transportForm.target = iframe.name;
+    transportForm.hidden = true;
+
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "application_payload";
+    input.value = JSON.stringify(payload);
+    transportForm.appendChild(input);
+    document.body.appendChild(transportForm);
+
+    timer = setTimeout(()=>{
+      if(finished) return;
+      finished = true;
+      cleanup();
+      finishButton();
+      alert("The server did not finish in time. Your draft is saved on this device, so you can try again without retyping.");
+    },20000);
+
+    transportForm.submit();
+  }catch(err){
+    console.error(err);
+    cleanup();
+    finishButton();
+    alert("We could not send your application. Your draft is saved on this device—please check your connection and try again.");
   }
 }
 
@@ -461,7 +596,17 @@ document.querySelector("#downloadCopy").addEventListener("click",()=>{
   URL.revokeObjectURL(url);
 });
 
-document.querySelector("#closeSuccess").addEventListener("click", closeModal);
+document.querySelector("#closeSuccess").addEventListener("click",()=>{
+  closeModal();
+  form.reset();
+  form.style.display = "";
+  success.classList.remove("show");
+  fillMajors("");
+  fillRoles("",roleFirst);
+  fillRoles("",roleSecond);
+  conditional.innerHTML = "";
+  showPage(1);
+});
 
 renderRoles();
 fillAcademicFaculties();
@@ -469,5 +614,6 @@ fillMajors("");
 fillTeams();
 fillRoles("", roleFirst);
 fillRoles("", roleSecond);
+restoreDraft();
 showPage(1);
 setLaunchState();
