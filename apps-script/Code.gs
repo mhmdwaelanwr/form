@@ -406,27 +406,88 @@ function sendApplicantReceipt_(record, updated) {
 function sendInternalNotification_(record, recipient, updated) {
   const action = updated ? "Updated application" : "New application";
 
+  const profile =
+    detailRow_("Applicant", record.full_name) +
+    detailRow_("Application ID", record.application_id) +
+    detailRowIf_("Status", record.status) +
+    detailRow_("Personal email", record.email) +
+    detailRow_("AOU email", record.university_email) +
+    detailRow_("Phone", record.phone) +
+    detailRowIf_("Faculty", record.faculty) +
+    detailRowIf_("Programme / Major", record.programme_major || record.major) +
+    detailRowIf_("Academic year", record.academic_year) +
+    detailRowIf_("Weekly availability", record.availability) +
+    detailRowIf_("In-person availability", record.in_person);
+
+  const preferences =
+    detailRow_("First preference", record.team_first) +
+    detailRow_("First role", record.preferred_role_first || record.preferred_role) +
+    detailRow_("Second preference", record.team_second) +
+    detailRow_("Second role", record.preferred_role_second);
+
+  const links =
+    linkRowIf_("LinkedIn", record.linkedin) +
+    linkRowIf_("GitHub / Portfolio", record.portfolio) +
+    linkRowIf_("Design / Media portfolio", record.design_portfolio) +
+    linkRowIf_("Other relevant link", record.other_link);
+
+  const coreAnswers =
+    longAnswerIf_("Evidence / Something shipped or organized", record.evidence) +
+    longAnswerIf_("Why they want to join", record.motivation) +
+    longAnswerIf_("Scenario response", record.scenario) +
+    longAnswerIf_("What they would improve at AOU", record.campus_impact) +
+    longAnswerIf_("Additional notes", record.notes);
+
+  const roleAnswers =
+    longAnswerIf_("Leadership experience", record.leadership_exp) +
+    longAnswerIf_("VP priority", record.vp_priority) +
+    longAnswerIf_("Coordination approach", record.coord_exp) +
+    longAnswerIf_("Finance approach", record.finance_exp) +
+    longAnswerIf_("Technical stack", record.technical_stack) +
+    longAnswerIf_("Technical demo idea", record.technical_demo) +
+    longAnswerIf_("Event experience", record.event_exp) +
+    longAnswerIf_("Operations strength", record.ops_strength) +
+    longAnswerIf_("Marketing strength", record.marketing_sample) +
+    longAnswerIf_("Campaign idea", record.campaign_idea) +
+    longAnswerIf_("Outreach experience", record.outreach_exp) +
+    longAnswerIf_("Partner targets", record.partner_target) +
+    longAnswerIf_("Community engagement idea", record.community_idea) +
+    longAnswerIf_("Member support approach", record.member_support) +
+    longAnswerIf_("Hackathon / project experience", record.hackathon_exp) +
+    longAnswerIf_("Project tracking system", record.project_system) +
+    longAnswerIf_("People / recruitment experience", record.people_exp) +
+    longAnswerIf_("Conflict handling", record.conflict) +
+    longAnswerIf_("Volunteer interests", record.volunteer_interest);
+
+  const metadata =
+    detailRowIf_("Submission reference", record.submission_reference) +
+    detailRowIf_("Form version", record.form_version) +
+    detailRowIf_("Submitted from browser at", record.client_submitted_at) +
+    detailRowIf_("Server received at", record.server_received_at) +
+    detailRowIf_("Last submitted at", record.last_submitted_at);
+
   MailApp.sendEmail({
     to: recipient,
     name: SETTINGS.CLUB_NAME,
     replyTo: record.email,
-    subject: action + " — " + record.full_name,
+    subject: action + " — " + record.full_name + " — " + (record.team_first || "Founding Team"),
     htmlBody:
       emailShell_(
-        "<h2 style='margin:0 0 14px;font-size:22px'>" + escapeHtml_(action) + "</h2>" +
-        detailRow_("Applicant", record.full_name) +
-        detailRow_("Application ID", record.application_id) +
-        detailRow_("Personal email", record.email) +
-        detailRow_("AOU email", record.university_email) +
-        detailRow_("Phone", record.phone) +
-        detailRow_("First preference", record.team_first) +
-        detailRow_("First role", record.preferred_role_first || record.preferred_role) +
-        detailRow_("Second preference", record.team_second) +
-        detailRow_("Second role", record.preferred_role_second) +
-        "<p style='margin:18px 0 0;color:#625d57'>Open the Applications sheet to review the full submission.</p>"
+        "<h2 style='margin:0 0 8px;font-size:24px'>" + escapeHtml_(action) + "</h2>" +
+        "<p style='margin:0 0 18px;color:#625d57'>Full applicant response is included below so you can review it directly from the email.</p>" +
+        sectionHeading_("Applicant profile") + profile +
+        sectionHeading_("Team preferences") + preferences +
+        (links ? sectionHeading_("Links & portfolio") + links : "") +
+        sectionHeading_("Application answers") + coreAnswers +
+        (roleAnswers ? sectionHeading_("Role-specific answers") + roleAnswers : "") +
+        sectionHeading_("Submission details") + metadata +
+        "<div style='margin-top:22px;padding:14px 16px;background:#f6f2eb;border-radius:12px;color:#625d57;font-size:13px'>" +
+          "The Google Sheet remains the source of truth for reviewer status, score and notes." +
+        "</div>"
       )
   });
 }
+
 
 function detailRow_(label, value) {
   return "<div style='padding:10px 0;border-bottom:1px solid #e7e0d8'>" +
@@ -434,6 +495,42 @@ function detailRow_(label, value) {
     escapeHtml_(label) + "</div>" +
     "<div style='margin-top:3px;font-weight:600'>" + escapeHtml_(value || "—") + "</div>" +
     "</div>";
+}
+
+function sectionHeading_(title) {
+  return "<div style='margin:26px 0 6px;padding:8px 0;border-bottom:2px solid #c96442;" +
+    "font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#c96442'>" +
+    escapeHtml_(title) + "</div>";
+}
+
+function detailRowIf_(label, value) {
+  if (value === undefined || value === null || String(value).trim() === "") return "";
+  return detailRow_(label, value);
+}
+
+function longAnswerIf_(label, value) {
+  if (value === undefined || value === null || String(value).trim() === "") return "";
+  return "<div style='padding:14px 0;border-bottom:1px solid #e7e0d8'>" +
+    "<div style='font-size:11px;color:#8a8179;text-transform:uppercase;letter-spacing:.05em'>" +
+      escapeHtml_(label) +
+    "</div>" +
+    "<div style='margin-top:7px;white-space:pre-wrap;line-height:1.6;color:#292622'>" +
+      escapeHtml_(value) +
+    "</div>" +
+  "</div>";
+}
+
+function linkRowIf_(label, value) {
+  if (value === undefined || value === null || String(value).trim() === "") return "";
+  const url = String(value).trim();
+  return "<div style='padding:10px 0;border-bottom:1px solid #e7e0d8'>" +
+    "<div style='font-size:11px;color:#8a8179;text-transform:uppercase;letter-spacing:.05em'>" +
+      escapeHtml_(label) +
+    "</div>" +
+    "<div style='margin-top:3px'><a href='" + escapeHtml_(url) +
+      "' style='color:#3d67b1;text-decoration:none;word-break:break-all'>" +
+      escapeHtml_(url) + "</a></div>" +
+  "</div>";
 }
 
 function emailShell_(body) {
