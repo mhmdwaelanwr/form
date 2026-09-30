@@ -377,30 +377,73 @@ function isValidAouEmail_(email) {
   return /^[^\s@]+@std\.aou\.edu\.eg$/i.test(String(email || "").trim());
 }
 
-function sendApplicantReceipt_(record) {
+function sendApplicantReceipt_(record, updated) {
+  if (!SETTINGS.SEND_APPLICANT_EMAIL) return;
+
+  const title = updated ? "Application updated" : "Application received";
+  const action = updated ? "updated" : "received";
+
   MailApp.sendEmail({
     to: record.email,
-    subject: SETTINGS.CLUB_NAME + " — Application received",
+    name: SETTINGS.CLUB_NAME,
+    replyTo: SETTINGS.CLUB_EMAIL,
+    subject: SETTINGS.CLUB_NAME + " — " + title,
     htmlBody:
-      "<p>Hi " + escapeHtml_(record.full_name) + ",</p>" +
-      "<p>Your founding team application has been received.</p>" +
-      "<p><b>Application ID:</b> " + escapeHtml_(record.application_id) + "</p>" +
-      "<p><b>First preference:</b> " + escapeHtml_(record.team_first) + "</p>" +
-      "<p>Keep this ID for reference. If you are shortlisted, the recruitment team will contact you.</p>" +
-      "<p>— " + escapeHtml_(SETTINGS.CLUB_NAME) + "</p>"
+      emailShell_(
+        "<p style='margin:0 0 16px'>Hi <b>" + escapeHtml_(record.full_name) + "</b>,</p>" +
+        "<h2 style='margin:0 0 10px;font-size:24px'>" + title + ".</h2>" +
+        "<p style='margin:0 0 18px;color:#625d57'>Your founding team application has been " + action + " successfully.</p>" +
+        detailRow_("Application ID", record.application_id) +
+        detailRow_("First preference", record.team_first) +
+        detailRow_("Preferred role", record.preferred_role_first || record.preferred_role) +
+        "<p style='margin:20px 0 8px'><b>What happens next?</b></p>" +
+        "<p style='margin:0;color:#625d57'>Our recruitment team will review your application. If shortlisted, we’ll contact you using the details you submitted.</p>" +
+        "<p style='margin:22px 0 0'><a href='" + SETTINGS.WHATSAPP_URL + "' style='display:inline-block;padding:11px 16px;background:#1f8f55;color:#fff;text-decoration:none;border-radius:10px;font-weight:700'>Follow recruitment updates on WhatsApp</a></p>"
+      )
   });
 }
 
-function sendInternalNotification_(record, recipient) {
+function sendInternalNotification_(record, recipient, updated) {
+  const action = updated ? "Updated application" : "New application";
+
   MailApp.sendEmail({
     to: recipient,
-    subject: "New application — " + record.full_name,
+    name: SETTINGS.CLUB_NAME,
+    replyTo: record.email,
+    subject: action + " — " + record.full_name,
     htmlBody:
-      "<p><b>" + escapeHtml_(record.full_name) + "</b> submitted a new application.</p>" +
-      "<p><b>ID:</b> " + escapeHtml_(record.application_id) + "<br>" +
-      "<b>Team:</b> " + escapeHtml_(record.team_first) + "<br>" +
-      "<b>Role:</b> " + escapeHtml_(record.preferred_role) + "</p>"
+      emailShell_(
+        "<h2 style='margin:0 0 14px;font-size:22px'>" + escapeHtml_(action) + "</h2>" +
+        detailRow_("Applicant", record.full_name) +
+        detailRow_("Application ID", record.application_id) +
+        detailRow_("Personal email", record.email) +
+        detailRow_("AOU email", record.university_email) +
+        detailRow_("Phone", record.phone) +
+        detailRow_("First preference", record.team_first) +
+        detailRow_("First role", record.preferred_role_first || record.preferred_role) +
+        detailRow_("Second preference", record.team_second) +
+        detailRow_("Second role", record.preferred_role_second) +
+        "<p style='margin:18px 0 0;color:#625d57'>Open the Applications sheet to review the full submission.</p>"
+      )
   });
+}
+
+function detailRow_(label, value) {
+  return "<div style='padding:10px 0;border-bottom:1px solid #e7e0d8'>" +
+    "<div style='font-size:11px;color:#8a8179;text-transform:uppercase;letter-spacing:.05em'>" +
+    escapeHtml_(label) + "</div>" +
+    "<div style='margin-top:3px;font-weight:600'>" + escapeHtml_(value || "—") + "</div>" +
+    "</div>";
+}
+
+function emailShell_(body) {
+  return "<div style='font-family:Arial,sans-serif;background:#f7f4ed;padding:24px;color:#1b1917'>" +
+    "<div style='max-width:620px;margin:auto;background:#fff;border:1px solid #e5ded6;border-radius:16px;padding:26px'>" +
+    "<div style='font-size:12px;color:#c96442;font-weight:700;margin-bottom:18px'>CLAUDE BUILDER CLUB — AOU EGYPT</div>" +
+    body +
+    "<div style='margin-top:26px;padding-top:16px;border-top:1px solid #e7e0d8;font-size:12px;color:#8a8179'>" +
+    "Questions? Reply to this email or contact " + escapeHtml_(SETTINGS.CLUB_EMAIL) + "." +
+    "</div></div></div>";
 }
 
 function escapeHtml_(s) {
