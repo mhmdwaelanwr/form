@@ -62,49 +62,49 @@ const TEAMS = [
     cat:"TECHNICAL",
     desc:"Owns workshops, demos, technical content and mentoring.",
     items:["AI / LLM","Backend / API","Agents / MCP","Cloud / DevOps"],
-    roles:["Head of Technical","Vice Head of Technical","AI / LLM Mentor","Backend / API Builder","Agents / MCP Builder","Cloud / DevOps Support","Technical Content Member","Technical Member"]
+    roles:["Head of Technical","Co-Head of Technical","AI / LLM Mentor","Backend / API Builder","Agents / MCP Builder","Cloud / DevOps Support","Technical Content Member","Technical Member"]
   },
   {
     name:"Events & Operations",
     cat:"EXECUTION",
     desc:"Turns ideas into events that run smoothly.",
     items:["Logistics","Registration","Venue & equipment","Run-of-show"],
-    roles:["Head of Events & Operations","Vice Head of Events & Operations","Event Coordinator","Logistics Coordinator","Registration Coordinator","Venue & Equipment Coordinator","Operations Member"]
+    roles:["Head of Events & Operations","Co-Head of Events & Operations","Event Coordinator","Logistics Coordinator","Registration Coordinator","Venue & Equipment Coordinator","Operations Member"]
   },
   {
     name:"Marketing & Media",
     cat:"BRAND",
     desc:"Builds the public identity and storytelling engine of the club.",
     items:["Design","Social Media","Content","Photo / Video"],
-    roles:["Head of Marketing & Media","Vice Head of Marketing & Media","Graphic Designer","Social Media Specialist","Content Writer / Copywriter","Photographer / Videographer","Video Editor","Marketing Member"]
+    roles:["Head of Marketing & Media","Co-Head of Marketing & Media","Graphic Designer","Social Media Specialist","Content Writer / Copywriter","Photographer / Videographer","Video Editor","Marketing Member"]
   },
   {
     name:"PR & Partnerships",
     cat:"EXTERNAL",
     desc:"Connects the club with speakers, communities, sponsors and collaborators.",
     items:["Sponsor outreach","Speaker relations","Club collaborations","External communications"],
-    roles:["Head of PR & Partnerships","Vice Head of PR & Partnerships","PR & Outreach Coordinator","Partnerships Coordinator","Sponsorships Coordinator","Speaker Relations Coordinator","External Relations Member"]
+    roles:["Head of PR & Partnerships","Co-Head of PR & Partnerships","PR & Outreach Coordinator","Partnerships Coordinator","Sponsorships Coordinator","Speaker Relations Coordinator","External Relations Member"]
   },
   {
     name:"Community & Membership",
     cat:"PEOPLE",
     desc:"Keeps members engaged, supported and connected.",
     items:["Onboarding","Engagement","Feedback & retention","Member database"],
-    roles:["Head of Community & Membership","Vice Head of Community & Membership","Community Coordinator","Membership & Onboarding Coordinator","Engagement Coordinator","Feedback & Retention Coordinator","Community Member"]
+    roles:["Head of Community & Membership","Co-Head of Community & Membership","Community Coordinator","Membership & Onboarding Coordinator","Engagement Coordinator","Feedback & Retention Coordinator","Community Member"]
   },
   {
     name:"Projects & Hackathons",
     cat:"BUILD",
     desc:"Helps members form teams, ship projects and prepare for challenges.",
     items:["Project coordination","Hackathon support","Demo Day","Team matching"],
-    roles:["Head of Projects & Hackathons","Vice Head of Projects & Hackathons","Project Coordinator","Hackathon Coordinator","Demo Day Coordinator","Team Matching / Mentorship Coordinator","Projects Member"]
+    roles:["Head of Projects & Hackathons","Co-Head of Projects & Hackathons","Project Coordinator","Hackathon Coordinator","Demo Day Coordinator","Team Matching / Mentorship Coordinator","Projects Member"]
   },
   {
     name:"HR / People & Culture",
     cat:"PEOPLE OPS",
     desc:"Owns internal recruitment, interviews, performance follow-up and culture.",
     items:["Recruitment","Interview coordination","Performance follow-up","Recognition"],
-    roles:["Head of HR / People & Culture","Vice Head of HR / People & Culture","Recruitment Coordinator","Interview Coordinator","Performance & Culture Coordinator","HR Member"]
+    roles:["Head of HR / People & Culture","Co-Head of HR / People & Culture","Recruitment Coordinator","Interview Coordinator","Performance & Culture Coordinator","HR Member"]
   },
   {
     name:"General Member / Volunteer",
@@ -357,6 +357,7 @@ function formObject(){
   const major = data.major || "";
   const firstRole = data.preferred_role || "";
   const secondRole = data.second_preferred_role || "";
+  const universityEmail = data.university_email || "";
 
   // Keep compatibility with the already-deployed Apps Script schema.
   data.major = faculty && major ? `${faculty} — ${major}` : major;
@@ -364,8 +365,15 @@ function formObject(){
     ? `1st: ${firstRole} | 2nd: ${secondRole}`
     : firstRole;
 
+  const existingNotes = data.notes || "";
+  data.notes = [
+    universityEmail ? "AOU university email: " + universityEmail : "",
+    existingNotes
+  ].filter(Boolean).join("\n");
+
   delete data.faculty;
   delete data.second_preferred_role;
+  delete data.university_email;
 
   data.client_submitted_at = new Date().toISOString();
   data.user_agent = navigator.userAgent;
@@ -381,106 +389,65 @@ async function submitApplication(){
   }
 
   nextBtn.disabled = true;
-  nextBtn.textContent = "Submitting...";
+  nextBtn.textContent = "Submitting securely...";
 
   const displayTeam = teamFirst.value;
   const displayRole = roleFirst.value;
   const payload = formObject();
-  const nonce = "cbc-" + Date.now() + "-" + Math.random().toString(36).slice(2, 12);
+  const submissionReference =
+    "CBC-" +
+    new Date().toISOString().slice(0,10).replaceAll("-","") +
+    "-" +
+    Math.random().toString(36).slice(2,8).toUpperCase();
 
-  payload._transport = "iframe";
-  payload._nonce = nonce;
+  payload.notes = [
+    "Submission reference: " + submissionReference,
+    payload.notes || ""
+  ].filter(Boolean).join("\n");
 
-  let frame = null;
-  let submitForm = null;
-  let timer = null;
+  latestSubmission = {...payload, submission_reference:submissionReference};
 
-  const cleanup = () => {
-    window.removeEventListener("message", onMessage);
-    if(timer) clearTimeout(timer);
-    if(submitForm) submitForm.remove();
-    if(frame) frame.remove();
-  };
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 15000);
 
-  const finishButtons = () => {
-    nextBtn.disabled = false;
-    nextBtn.textContent = "Submit application →";
-  };
+  try{
+    await fetch(CFG.SUBMISSION_ENDPOINT,{
+      method:"POST",
+      mode:"no-cors",
+      cache:"no-store",
+      headers:{"Content-Type":"text/plain;charset=UTF-8"},
+      body:JSON.stringify(payload),
+      signal:controller.signal
+    });
 
-  const onMessage = (event) => {
-    const allowedOrigin =
-      event.origin.includes("googleusercontent.com") ||
-      event.origin.includes("script.google.com");
-
-    if(!allowedOrigin) return;
-    if(!event.data || event.data.type !== "CBC_APPLICATION_RESULT") return;
-    if(event.data.nonce !== nonce) return;
-
-    const result = event.data;
-    cleanup();
-    finishButtons();
-
-    if(result.ok === false){
-      alert(result.message || "Submission failed. Please try again.");
-      return;
-    }
-
-    latestSubmission = {...payload, ...result};
-    delete latestSubmission._transport;
-    delete latestSubmission._nonce;
+    clearTimeout(timeout);
 
     form.style.display = "none";
     success.classList.add("show");
 
-    const appId = result.application_id || "Submitted";
-    document.querySelector("#applicationId").textContent = appId;
+    document.querySelector("#submissionReference").textContent = submissionReference;
     document.querySelector("#successTeam").textContent =
       displayRole ? `${displayTeam} · ${displayRole}` : displayTeam;
 
-    document.querySelector("#successMessage").textContent = result.duplicate
-      ? "We already have an application with this Student ID or email, so we kept your original application instead of creating a duplicate."
-      : "Your application to the Claude Builder Club — AOU Egypt founding team has been received successfully.";
+    document.querySelector("#successMessage").textContent =
+      "Your application to the Claude Builder Club — AOU Egypt founding team has been sent successfully.";
 
     document.querySelector(".modal-card").scrollTop = 0;
-  };
-
-  try{
-    window.addEventListener("message", onMessage);
-
-    frame = document.createElement("iframe");
-    frame.name = "cbc-submit-" + nonce.replace(/[^a-z0-9-]/gi, "");
-    frame.style.display = "none";
-    frame.setAttribute("aria-hidden", "true");
-    document.body.appendChild(frame);
-
-    submitForm = document.createElement("form");
-    submitForm.method = "POST";
-    submitForm.action = CFG.SUBMISSION_ENDPOINT;
-    submitForm.target = frame.name;
-    submitForm.style.display = "none";
-
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "application_payload";
-    input.value = JSON.stringify(payload);
-    submitForm.appendChild(input);
-
-    document.body.appendChild(submitForm);
-
-    timer = setTimeout(() => {
-      cleanup();
-      finishButtons();
-      alert("The submission is taking too long. Please check your internet connection and try again.");
-    }, 30000);
-
-    submitForm.submit();
   }catch(err){
-    cleanup();
-    finishButtons();
+    clearTimeout(timeout);
     console.error(err);
-    alert("We could not submit your application. Please try again.");
+
+    if(err && err.name === "AbortError"){
+      alert("The connection took too long. Please switch networks or try again in a moment.");
+    }else{
+      alert("We could not send your application. Please check your connection and try again.");
+    }
+  }finally{
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Submit application →";
   }
 }
+
 
 document.querySelector("#downloadCopy").addEventListener("click",()=>{
   if(!latestSubmission) return;
