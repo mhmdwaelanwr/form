@@ -90,44 +90,21 @@ function setup() {
   let apps = ss.getSheetByName(SETTINGS.APPLICATIONS_SHEET);
   if (!apps) apps = ss.insertSheet(SETTINGS.APPLICATIONS_SHEET);
 
-  // Safe/idempotent setup: do not destroy existing applications.
-  if (apps.getLastRow() > 1) {
-    throw new Error("Applications already exist. setup() will not overwrite applicant data.");
-  }
-  apps.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+  ensureSchema_(apps);
   apps.setFrozenRows(1);
-  apps.getRange(1,1,1,HEADERS.length)
+  const headers = getHeaders_(apps);
+  apps.getRange(1,1,1,headers.length)
     .setFontWeight("bold")
     .setBackground("#27221E")
     .setFontColor("#FFFFFF");
-  apps.autoResizeColumns(1, HEADERS.length);
-
-  const statusCol = HEADERS.indexOf("status") + 1;
-  const statusRule = SpreadsheetApp.newDataValidation()
-    .requireValueInList(["New","Shortlisted","Interview","Accepted","Waitlist","Rejected"], true)
-    .setAllowInvalid(false)
-    .build();
-  apps.getRange(2,statusCol,Math.max(apps.getMaxRows()-1,1),1).setDataValidation(statusRule);
-
-  const scoreCol = HEADERS.indexOf("review_score") + 1;
-  const scoreRule = SpreadsheetApp.newDataValidation()
-    .requireNumberBetween(0,100)
-    .setAllowInvalid(true)
-    .build();
-  apps.getRange(2,scoreCol,Math.max(apps.getMaxRows()-1,1),1).setDataValidation(scoreRule);
 
   let cfg = ss.getSheetByName(SETTINGS.CONFIG_SHEET);
   if (!cfg) cfg = ss.insertSheet(SETTINGS.CONFIG_SHEET);
-  cfg.clear();
-  cfg.getRange("A1:B5").setValues([
-    ["Setting","Value"],
-    ["Club Name", SETTINGS.CLUB_NAME],
-    ["Recruitment Status","CLOSED"],
-    ["Internal Notification Email", ""],
-    ["Notes","Set Recruitment Status to CLOSED to stop submissions."]
-  ]);
+  ensureConfigRow_(cfg, "Club Name", SETTINGS.CLUB_NAME);
+  ensureConfigRow_(cfg, "Recruitment Status", "CLOSED");
+  ensureConfigRow_(cfg, "Internal Notification Email", SETTINGS.CLUB_EMAIL);
+  ensureConfigRow_(cfg, "Notes", "Set Recruitment Status to CLOSED to stop submissions.");
   cfg.getRange("A1:B1").setFontWeight("bold").setBackground("#DA6D3D").setFontColor("#FFFFFF");
-  cfg.autoResizeColumns(1,2);
 }
 
 function doGet() {
